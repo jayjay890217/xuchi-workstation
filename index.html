@@ -138,6 +138,65 @@
       .bottom{flex-direction:column;align-items:flex-start}
     }
     @media (prefers-reduced-motion: reduce){ .card{transition:none} }
+
+    /* ====== 店內備註 ====== */
+    .hero{grid-template-columns:1.55fr .45fr}
+    .greet{color:var(--orange2);font-weight:800;font-size:14px;margin-top:10px}
+    .notes{padding:22px 24px;display:flex;flex-direction:column;gap:12px;min-height:250px}
+    .notes:after{display:none}
+    .n-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .n-head h2{margin:0;font-size:20px;font-weight:900;flex:1;white-space:nowrap}
+    .n-meta{color:var(--muted);font-size:13px}
+    .n-btn{border:1px solid #3a3d43;background:#1b1d21;color:#e8e8e8;border-radius:10px;padding:7px 11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+    .n-btn:hover{border-color:#50545b}
+    .n-btn.pri{background:var(--orange);border-color:var(--orange);color:#160a00}
+    .n-btn.ok{background:#1f6f3c;border-color:#2c8a4f;color:#eafff0}
+    .n-btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+    .n-btn:disabled{opacity:.5;cursor:wait}
+    .n-form{display:flex;gap:10px;align-items:stretch}
+    .n-form textarea{
+      flex:1;min-height:52px;max-height:160px;resize:vertical;border-radius:14px;border:1px solid var(--line);
+      background:#0c0d0f;color:var(--text);padding:12px 14px;font:inherit;font-size:15px;line-height:1.5
+    }
+    .n-form textarea:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
+    .n-form .n-btn{padding:0 18px;font-size:15px;border-radius:14px}
+    .n-empty{color:var(--muted);font-size:14px;padding:6px 2px}
+    .n-sec{display:flex;flex-direction:column;gap:6px}
+    .n-sec h3{margin:6px 0 0;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+    .n-pend{border:1px solid rgba(255,155,61,.45);background:rgba(255,122,0,.07);border-radius:14px;padding:10px 12px}
+    .n-pend h3{color:var(--orange2);margin-top:0}
+    .n-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-top:1px solid #1f2125}
+    .n-item:first-of-type{border-top:0}
+    .n-ic{font-size:18px;line-height:1.4}
+    .n-body{flex:1;min-width:0;font-size:14px;line-height:1.5}
+    .n-body .n-sum{font-weight:700}
+    .n-body .n-txt{color:#c7cbd1;word-break:break-word;white-space:pre-wrap}
+    .n-body .n-sum + .n-txt{color:var(--muted);font-size:13px}
+    .n-sub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:3px;font-size:12px;color:var(--muted)}
+    .n-cat{border:1px solid #3a3d43;border-radius:999px;padding:1px 9px;background:#17191c;color:#dfe2e6;font:inherit;font-size:12px;cursor:pointer}
+    .n-cat:disabled{cursor:default}
+    .pill{border-radius:999px;padding:1px 8px;font-weight:700}
+    .pill.wait{background:rgba(255,122,0,.15);color:var(--orange2)}
+    .pill.sent{background:rgba(103,228,128,.12);color:var(--ok)}
+    .pill.queue{background:#22252a;color:var(--muted)}
+    .n-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .n-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 18px}
+    .n-list{max-height:340px;overflow:auto;padding-right:4px}
+    .n-warn{font-size:13px;color:var(--orange2)}
+
+    /* ====== 對話框 ====== */
+    .mask{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+    .mask[hidden]{display:none}
+    .dlg{background:#141518;border:1px solid var(--line);border-radius:20px;padding:20px;width:100%;max-width:560px;max-height:88vh;overflow:auto;box-shadow:var(--shadow)}
+    .dlg h3{margin:0 0 6px;font-size:18px}
+    .dlg p{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 12px}
+    .dlg label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+    .dlg input,.dlg select{width:100%;border-radius:10px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:10px 12px;font:inherit;font-size:14px}
+    .dlg .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+    .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#22252a;border:1px solid #3a3d43;color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;max-width:90vw}
+    .toast.err{background:#5c1717;border-color:#a33}
+    @media (max-width: 900px){ .hero{grid-template-columns:1fr} .clock-card{flex-direction:row;align-items:baseline;gap:14px;flex-wrap:wrap} }
+    @media (max-width: 560px){ .notes{padding:16px} .n-form{flex-direction:column} .n-form .n-btn{padding:12px} }
   </style>
 </head>
 <body>
@@ -160,16 +219,24 @@
     </div>
 
     <section class="hero">
-      <div class="hero-card">
-        <div class="eyebrow">XUCHI GROWTH SYSTEM</div>
-        <div class="hero-title" id="greeting">今天要處理什麼？</div>
-        <div class="hero-copy">
-          工單、客戶資料、LINE 官方帳號、工作照片與試算表，都從這裡進入。
+      <div class="hero-card notes" id="notes">
+        <div class="n-head">
+          <h2>📋 店內備註</h2>
+          <span class="n-meta" id="nMeta"></span>
+          <button class="n-btn" type="button" id="nSend" title="把還沒發送的備註立刻整理後傳給櫃台">立即發送</button>
+          <button class="n-btn ghost" type="button" id="nRefresh" title="重新讀取">↻</button>
+          <button class="n-btn ghost" type="button" id="nCfgBtn" title="備註設定">⚙</button>
         </div>
+        <form class="n-form" id="nForm" autocomplete="off">
+          <textarea id="nText" rows="2" placeholder="例：小陳預支 3000｜跟規速調了 2 罐 F8200｜阿明自己裝了來令片｜DRG 空濾沒了｜幫王先生叫火星塞　（Enter 送出，Shift+Enter 換行）"></textarea>
+          <button class="n-btn pri" type="submit" id="nAdd">新增</button>
+        </form>
+        <div id="nBox"><div class="n-empty">讀取中…</div></div>
       </div>
       <div class="clock-card">
         <div class="time" id="clock">--:--</div>
         <div class="date" id="date">----</div>
+        <div class="greet" id="greeting"></div>
       </div>
     </section>
 
@@ -182,75 +249,172 @@
 
     <div class="bottom">
       <small id="footInfo">旭馳工作台</small>
-      <button class="btn" type="button" onclick="location.reload()">重新整理</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" type="button" id="linkEditBtn">編輯連結</button>
+        <button class="btn" type="button" onclick="location.reload()">重新整理</button>
+      </div>
     </div>
   </main>
 
+  <!-- 備註設定 -->
+  <div class="mask" id="nCfg" hidden>
+    <div class="dlg">
+      <h3>備註設定</h3>
+      <p>輸入 Apps Script「旭馳 LINE 通知」指令碼屬性裡的 <b>NOTE_KEY</b>。只會存在這台電腦的瀏覽器，不會放上 GitHub。</p>
+      <label for="nKeyIn">備註密碼（NOTE_KEY）</label>
+      <input id="nKeyIn" type="password" autocomplete="off">
+      <div class="acts">
+        <button class="n-btn ghost" type="button" id="nCfgCancel">取消</button>
+        <button class="n-btn pri" type="button" id="nCfgSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 編輯連結 -->
+  <div class="mask" id="linkDlg" hidden>
+    <div class="dlg">
+      <h3>編輯連結</h3>
+      <p>貼上網址就會出現在首頁，只存在這台電腦。清空 = 回到預設。</p>
+      <div id="linkRows"></div>
+      <div class="acts">
+        <button class="n-btn ghost" type="button" id="linkCancel">取消</button>
+        <button class="n-btn pri" type="button" id="linkSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ====== 連結設定：只需要改這裡 ======
-    // url 留空 ("") = 尚未設定，卡片會顯示灰色、不能點
+    // url 留空 ("") = 尚未設定，卡片會顯示灰色、不能點（也可以在頁面最下方「編輯連結」貼網址）
+    // win: true    = 開在獨立視窗（不是分頁）
     // iosOnly: true = 只在 iPad / iPhone 顯示（例如捷徑）
+    const APPSHEET_SALES = "https://www.appsheet.com/start/652dbbcb-f80e-4c81-a001-4ec92646882d#appName=NewApp-894803302-26-02-21-4&view=" + encodeURIComponent("業績總覽");
     const APPS = [
-      {id:"line",   title:"官方LINE",      desc:"回覆客人與處理訊息",       icon:"💬", url:"https://manager.line.biz/account/@370zrkco/", orange:true},
-      {id:"cloud",  title:"雲端系統",      desc:"開啟旭馳店務 工單系統",     icon:"📱", url:"https://script.google.com/macros/s/AKfycbwxbwkVqz91gwdtj7dSgj53IhMAbaURfzFegBsn1yFFO3135b9fOUfE-QU4pNtdNey8/exec", orange:true},
-      {id:"photos", title:"工作照片",      desc:"進入店內照片整理入口",       icon:"📸", url:"https://photos.google.com/", orange:true},
-      {id:"camera", title:"相機",          desc:"開啟 iPad 相機",            icon:"📷", url:"shortcuts://run-shortcut?name=" + encodeURIComponent("開啟相機"), orange:true, iosOnly:true},
-      {id:"cust",   title:"客戶資料",      desc:"查詢會員、車牌與客戶紀錄",   icon:"👤", url:""},
-      {id:"quote",  title:"報價系統",      desc:"快速建立估價與維修項目",     icon:"🧾", url:""},
-      {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",   icon:"📊", url:"https://docs.google.com/spreadsheets/"},
-      {id:"rescue", title:"道路救援",      desc:"建立或查看道路救援案件",     icon:"🛟", url:""},
+      {id:"line",   title:"官方LINE",      desc:"回覆客人與處理訊息",         icon:"💬", url:"https://manager.line.biz/account/@370zrkco/", orange:true},
+      {id:"cloud",  title:"雲端系統",      desc:"開啟旭馳店務 工單系統",       icon:"📱", url:"https://script.google.com/macros/s/AKfycbwxbwkVqz91gwdtj7dSgj53IhMAbaURfzFegBsn1yFFO3135b9fOUfE-QU4pNtdNey8/exec", orange:true},
+      {id:"sales",  title:"AppSheet 業績", desc:"業績總覽，獨立視窗查詢",       icon:"📈", url:APPSHEET_SALES, orange:true, win:true},
+      {id:"hbs",    title:"好幫手",        desc:"SYM 頭家好幫手 KEY 單",       icon:"🛵", url:"", orange:true, win:true},
+      {id:"ecpay",  title:"綠界系統",      desc:"金流、發票後台",              icon:"💳", url:"https://vendor.ecpay.com.tw/", win:true},
+      {id:"daka",   title:"打卡之星",      desc:"員工出勤與打卡紀錄",          icon:"⏰", url:"", win:true},
+      {id:"google", title:"Google Chrome", desc:"開一個新的瀏覽器視窗",        icon:"🌐", url:"https://www.google.com/", win:true},
+      {id:"photos", title:"工作照片",      desc:"進入店內照片整理入口",         icon:"📸", url:"https://photos.google.com/"},
+      {id:"camera", title:"相機",          desc:"開啟 iPad 相機",              icon:"📷", url:"shortcuts://run-shortcut?name=" + encodeURIComponent("開啟相機"), iosOnly:true},
+      {id:"cust",   title:"客戶資料",      desc:"查詢會員、車牌與客戶紀錄",     icon:"👤", url:""},
+      {id:"quote",  title:"報價系統",      desc:"快速建立估價與維修項目",       icon:"🧾", url:""},
+      {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",     icon:"📊", url:"https://docs.google.com/spreadsheets/"},
+      {id:"rescue", title:"道路救援",      desc:"建立或查看道路救援案件",       icon:"🛟", url:""},
     ];
-    const VERSION = "2026-10-01";
+    const VERSION = "2026-10-02";
     // ===================================
+
+    const $ = id => document.getElementById(id);
+    const store = {
+      get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+      set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+    };
+    function toast(msg, err){
+      const t = document.createElement("div");
+      t.className = "toast" + (err ? " err" : ""); t.textContent = msg;
+      document.body.appendChild(t); setTimeout(() => t.remove(), err ? 4500 : 2200);
+    }
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
     const visibleApps = APPS.filter(a => !a.iosOnly || isIOS);
-    const grid = document.getElementById("grid");
+    const grid = $("grid");
+    const urlOf = app => (store.get("xc_links", {})[app.id] || app.url || "").trim();
+
+    // 獨立視窗：同一個功能重複點會回到同一個視窗
+    function openWin(app, url){
+      const w = Math.min(1440, screen.availWidth - 40), h = Math.min(960, screen.availHeight - 60);
+      const left = Math.max(0, (screen.availWidth - w) / 2), top = Math.max(0, (screen.availHeight - h) / 2);
+      const win = window.open(url, "xcw_" + app.id, `popup=yes,width=${w},height=${h},left=${left},top=${top}`);
+      if (win) { try { win.focus(); } catch(e){} }
+      else window.open(url, "xc_" + app.id); // 視窗被擋就改開分頁
+    }
 
     let keyNo = 0;
-    visibleApps.forEach(app => {
-      const ready = !!app.url;
-      const el = document.createElement(ready ? "a" : "div");
-      el.className = "card" + (app.orange ? " orange" : "") + (ready ? "" : " disabled");
-      if (ready) {
-        el.href = app.url;
-        // 外部網頁開在固定分頁：重複點同一個功能不會一直開新分頁
-        if (/^https?:/.test(app.url)) {
-          el.target = "xc_" + app.id;
-          el.rel = "noopener";
+    function renderGrid(){
+      grid.textContent = "";
+      keyNo = 0;
+      visibleApps.forEach(app => {
+        const url = urlOf(app);
+        const ready = !!url;
+        const el = document.createElement(ready ? "a" : "div");
+        el.className = "card" + (app.orange ? " orange" : "") + (ready ? "" : " disabled");
+        if (ready) {
+          el.href = url;
+          if (/^https?:/.test(url)) {
+            // 外部網頁開在固定分頁：重複點同一個功能不會一直開新分頁
+            el.target = "xc_" + app.id;
+            el.rel = "noopener";
+            if (app.win && !isIOS) el.addEventListener("click", e => { e.preventDefault(); openWin(app, url); });
+          }
+        } else {
+          el.setAttribute("aria-disabled", "true");
+          el.title = "按頁面最下方「編輯連結」貼上網址";
         }
-      } else {
-        el.setAttribute("aria-disabled", "true");
-      }
 
-      const top = document.createElement("div");
-      const icon = document.createElement("div");
-      icon.className = "icon";
-      icon.textContent = app.icon;
-      const h3 = document.createElement("h3");
-      h3.textContent = app.title;
-      const p = document.createElement("p");
-      p.textContent = app.desc;
-      top.append(icon, h3, p);
+        const top = document.createElement("div");
+        const icon = document.createElement("div");
+        icon.className = "icon";
+        icon.textContent = app.icon;
+        const h3 = document.createElement("h3");
+        h3.textContent = app.title;
+        const p = document.createElement("p");
+        p.textContent = app.desc;
+        top.append(icon, h3, p);
 
-      const arrow = document.createElement("div");
-      arrow.className = "arrow";
-      arrow.textContent = ready ? "開啟 →" : "尚未設定";
+        const arrow = document.createElement("div");
+        arrow.className = "arrow";
+        arrow.textContent = ready ? (app.win && !isIOS ? "開新視窗 ↗" : "開啟 →") : "尚未設定";
 
-      el.append(top, arrow);
+        el.append(top, arrow);
 
-      if (ready && keyNo < 9) {
-        keyNo++;
-        const key = document.createElement("span");
-        key.className = "key";
-        key.textContent = keyNo;
-        el.appendChild(key);
-        el.dataset.key = String(keyNo);
-      }
-      grid.appendChild(el);
-    });
+        if (ready && keyNo < 9) {
+          keyNo++;
+          const key = document.createElement("span");
+          key.className = "key";
+          key.textContent = keyNo;
+          el.appendChild(key);
+          el.dataset.key = String(keyNo);
+        }
+        grid.appendChild(el);
+      });
+      $("footInfo").textContent =
+        `旭馳工作台 · 版本 ${VERSION}` + (isIOS || !keyNo ? "" : ` · 數字鍵 1–${keyNo} 快速開啟`);
+    }
+    renderGrid();
+
+    // ====== 編輯連結（存在這台電腦） ======
+    $("linkEditBtn").onclick = () => {
+      const saved = store.get("xc_links", {});
+      const rows = $("linkRows"); rows.textContent = "";
+      visibleApps.forEach(app => {
+        const lb = document.createElement("label");
+        lb.textContent = app.icon + " " + app.title + (app.url ? "（預設已設定）" : "");
+        lb.htmlFor = "lk_" + app.id;
+        const inp = document.createElement("input");
+        inp.id = "lk_" + app.id; inp.dataset.id = app.id; inp.type = "url";
+        inp.placeholder = app.url || "https://…"; inp.value = saved[app.id] || "";
+        rows.append(lb, inp);
+      });
+      $("linkDlg").hidden = false;
+    };
+    $("linkCancel").onclick = () => { $("linkDlg").hidden = true; };
+    $("linkSave").onclick = () => {
+      const next = {};
+      let bad = "";
+      $("linkRows").querySelectorAll("input").forEach(inp => {
+        const v = inp.value.trim();
+        if (!v) return;
+        if (!/^(https?|shortcuts):\/\//i.test(v)) bad = bad || inp.dataset.id;
+        next[inp.dataset.id] = v;
+      });
+      if (bad) return toast("網址要以 https:// 開頭", true);
+      if (!store.set("xc_links", next)) return toast("這個瀏覽器不能儲存設定", true);
+      $("linkDlg").hidden = true; renderGrid(); toast("連結已更新");
+    };
 
     // 桌機：按數字鍵 1~9 直接開啟對應功能
     if (matchMedia("(hover:hover) and (pointer:fine)").matches) {
@@ -308,8 +472,181 @@
       }
     }, 60 * 1000);
 
-    document.getElementById("footInfo").textContent =
-      `旭馳工作台 · 版本 ${VERSION}` + (isIOS || !keyNo ? "" : ` · 數字鍵 1–${keyNo} 快速開啟`);
+    // ====== 店內備註（Apps Script「旭馳 LINE 通知」→ 試算表 → LINE） ======
+    const NOTE_API = "https://script.google.com/macros/s/AKfycby7WtQiQFrDiIPMdXxKd_bqAGkN_lyQYw3MruP9_UUg96DdNNNnx6gqnykat1XEkrovhw/exec";
+    const N_CATS = ["預支","調撥","員工自用","缺貨","叫貨","其他"];
+    const N_ICON = {"預支":"💵","調撥":"🔄","員工自用":"🧑‍🔧","缺貨":"📦","叫貨":"🛒","其他":"📝"};
+    const N_CONFIRM = {"預支":true,"調撥":true};
+    const N = { notes:[], hours:[], ready:true, loading:false, err:"" };
+
+    async function napi(type, body){
+      const key = store.get("xc_note_key", "");
+      if (!key) { const e = new Error("請先按 ⚙ 輸入備註密碼"); e.needKey = true; throw e; }
+      const r = await fetch(NOTE_API + "?type=" + encodeURIComponent(type), {
+        method: "POST", body: JSON.stringify(Object.assign({}, body || {}, { key }))
+      });
+      let j;
+      try { j = await r.json(); } catch (e) { throw new Error("備註系統沒有回應（請確認 Apps Script 已部署新版本）"); }
+      if (!j.ok) {
+        const e = new Error(j.error === "unauthorized" ? "備註密碼不正確，請按 ⚙ 重新輸入" : (j.error || "發生錯誤"));
+        e.needKey = j.error === "unauthorized"; throw e;
+      }
+      return j;
+    }
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const hm = s => String(s || "").slice(11, 16);
+    const md = s => String(s || "").slice(5, 10).replace("-", "/");
+
+    function nextSendText(){
+      if (!N.hours.length) return "";
+      const h = new Date().getHours();
+      const nx = N.hours.find(x => x > h);
+      return "下次彙整 " + (nx === undefined ? "明天 " + N.hours[0] : nx) + ":00";
+    }
+
+    function noteRow(n, today){
+      const pend = n.status === "待確認";
+      const state = pend ? '<span class="pill wait">待確認</span>'
+        : n.sent ? `<span class="pill sent">已發送 ${esc(hm(n.sent))}</span>`
+        : '<span class="pill queue">等待彙整</span>';
+      const day = n.created.slice(0, 10) === today ? "" : md(n.created) + " ";
+      const canEdit = !n.sent;
+      const catSel = canEdit
+        ? `<select class="n-cat" data-cat="${esc(n.id)}" title="改分類">${N_CATS.map(c => `<option${c === n.cat ? " selected" : ""}>${c}</option>`).join("")}</select>`
+        : `<span class="n-cat">${esc(n.cat)}</span>`;
+      const dirSel = n.cat === "調撥" && canEdit
+        ? `<select class="n-cat" data-dir="${esc(n.id)}" title="調撥方向">${["","規速→旭馳","旭馳→規速"].map(d => `<option value="${d}"${d === n.dir ? " selected" : ""}>${d || "方向？"}</option>`).join("")}</select>`
+        : (n.dir ? `<span>${esc(n.dir)}</span>` : "");
+      const acts = (pend ? `<button class="n-btn ok" data-ok="${esc(n.id)}">確認發送</button>` : "")
+        + (canEdit ? `<button class="n-btn ghost" data-del="${esc(n.id)}" title="刪除">✕</button>` : "");
+      return `<div class="n-item">
+        <div class="n-ic">${N_ICON[n.cat] || "📝"}</div>
+        <div class="n-body">
+          ${n.summary ? `<div class="n-sum">${esc(n.summary)}</div>` : ""}
+          <div class="n-txt">${esc(n.text)}</div>
+          <div class="n-sub">${catSel}${dirSel}<span>${esc(day + hm(n.created))}</span>${state}</div>
+        </div>
+        ${acts ? `<div class="n-acts">${acts}</div>` : ""}
+      </div>`;
+    }
+
+    function renderNotes(){
+      const box = $("nBox");
+      $("nMeta").textContent = N.err ? "" : [nextSendText(), N.ai ? "AI 分類" : ""].filter(Boolean).join(" · ");
+      if (N.err) {
+        box.innerHTML = `<div class="n-warn">${esc(N.err)}</div>`;
+        return;
+      }
+      const today = N.today || "";
+      const pend = N.notes.filter(n => n.status === "待確認");
+      const rest = N.notes.filter(n => n.status !== "待確認");
+      let html = "";
+      if (!N.ready) html += '<div class="n-warn">⚠️ 還沒設定 LINE 收件人（Apps Script 指令碼屬性 NOTE_TO），備註會先存著，設定後才會發送。</div>';
+      if (pend.length) {
+        html += `<div class="n-sec n-pend"><h3>⏳ 預支／調撥 待確認（${pend.length}）— 確認後才會發到專屬聊天室</h3>${pend.map(n => noteRow(n, today)).join("")}</div>`;
+      }
+      if (rest.length) {
+        const groups = N_CATS.map(c => [c, rest.filter(n => n.cat === c)]).filter(g => g[1].length);
+        html += '<div class="n-list n-groups">' + groups.map(([c, list]) =>
+          `<div class="n-sec"><h3>${N_ICON[c]} ${c}（${list.length}）</h3>${list.map(n => noteRow(n, today)).join("")}</div>`).join("") + "</div>";
+      }
+      if (!pend.length && !rest.length) html += '<div class="n-empty">今天還沒有備註。預支、調撥、員工自用、缺貨、叫貨都可以寫在這裡，系統會自動分類並定時傳給櫃台。</div>';
+      box.innerHTML = html;
+    }
+
+    async function loadNotes(quiet){
+      if (N.loading) return;
+      N.loading = true;
+      try {
+        const j = await napi("note-list");
+        Object.assign(N, { notes: j.notes || [], hours: j.hours || [], ready: !!j.ready, ai: !!j.ai, today: j.today, err: "" });
+      } catch (e) {
+        N.err = e.message;
+        if (!quiet && !e.needKey) toast(e.message, true);
+      } finally {
+        N.loading = false; renderNotes();
+      }
+    }
+
+    function upsert(n){
+      const i = N.notes.findIndex(x => x.id === n.id);
+      if (i >= 0) N.notes[i] = n; else N.notes.unshift(n);
+    }
+
+    $("nForm").onsubmit = async e => {
+      e.preventDefault();
+      const text = $("nText").value.trim();
+      if (!text) return $("nText").focus();
+      const btn = $("nAdd"); btn.disabled = true; btn.textContent = "分類中…";
+      try {
+        const j = await napi("note-add", { text });
+        upsert(j.note); N.err = ""; renderNotes();
+        $("nText").value = "";
+        toast(N_CONFIRM[j.note.cat] ? `已新增（${j.note.cat}，確認後才會發送）` : `已新增到「${j.note.cat}」`);
+      } catch (err) {
+        toast(err.message, true);
+        if (err.needKey) openNoteCfg();
+      } finally { btn.disabled = false; btn.textContent = "新增"; $("nText").focus(); }
+    };
+    $("nText").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("nForm").requestSubmit(); }
+    });
+
+    $("nBox").addEventListener("click", async e => {
+      const ok = e.target.closest("[data-ok]"), del = e.target.closest("[data-del]");
+      if (ok) {
+        const n = N.notes.find(x => x.id === ok.dataset.ok);
+        if (!n) return;
+        if (n.cat === "調撥" && !n.dir && !confirm("還沒選調撥方向，確定直接發送？")) return;
+        if (!confirm(`確認後會發送到專屬聊天室：\n\n${n.text}`)) return;
+        ok.disabled = true; ok.textContent = "發送中…";
+        try { const j = await napi("note-confirm", { id: n.id }); upsert(j.note); renderNotes(); toast("已確認並發送"); }
+        catch (err) { toast(err.message, true); ok.disabled = false; ok.textContent = "確認發送"; }
+      } else if (del) {
+        const n = N.notes.find(x => x.id === del.dataset.del);
+        if (!n || !confirm(`刪除這則備註？\n\n${n.text}`)) return;
+        try { await napi("note-delete", { id: n.id }); N.notes = N.notes.filter(x => x.id !== n.id); renderNotes(); toast("已刪除"); }
+        catch (err) { toast(err.message, true); }
+      }
+    });
+    $("nBox").addEventListener("change", async e => {
+      const c = e.target.closest("[data-cat]"), d = e.target.closest("[data-dir]");
+      const id = c ? c.dataset.cat : d ? d.dataset.dir : "";
+      if (!id) return;
+      try {
+        const j = await napi("note-update", c ? { id, cat: c.value } : { id, dir: d.value });
+        upsert(j.note); renderNotes(); toast("已更新");
+      } catch (err) { toast(err.message, true); loadNotes(true); }
+    });
+
+    $("nSend").onclick = async () => {
+      const btn = $("nSend");
+      const waiting = N.notes.filter(n => n.status === "一般" && !n.sent).length;
+      if (!waiting) return toast("沒有等待彙整的備註（預支／調撥請按「確認發送」）");
+      if (!confirm(`現在把 ${waiting} 則備註整理後傳給櫃台？`)) return;
+      btn.disabled = true;
+      try { const j = await napi("note-send"); toast(j.sent ? `已發送 ${j.sent} 則` : (j.message || "沒有需要發送的備註")); await loadNotes(true); }
+      catch (err) { toast(err.message, true); }
+      finally { btn.disabled = false; }
+    };
+    $("nRefresh").onclick = () => loadNotes(false);
+
+    function openNoteCfg(){ $("nKeyIn").value = store.get("xc_note_key", ""); $("nCfg").hidden = false; $("nKeyIn").focus(); }
+    $("nCfgBtn").onclick = openNoteCfg;
+    $("nCfgCancel").onclick = () => { $("nCfg").hidden = true; };
+    $("nCfgSave").onclick = () => {
+      if (!store.set("xc_note_key", $("nKeyIn").value.trim())) return toast("這個瀏覽器不能儲存設定", true);
+      $("nCfg").hidden = true; loadNotes(false);
+    };
+    $("nKeyIn").addEventListener("keydown", e => { if (e.key === "Enter") $("nCfgSave").click(); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
+    });
+
+    loadNotes(true);
+    // 其他電腦或平板新增的備註也同步過來
+    setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) loadNotes(true); });
   </script>
 </body>
 </html>
