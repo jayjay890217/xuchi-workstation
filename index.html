@@ -161,6 +161,14 @@
     .n-form textarea:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
     .n-form .n-btn{padding:0 18px;font-size:15px;border-radius:14px}
     .n-empty{color:var(--muted);font-size:14px;padding:6px 2px}
+    .n-who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .n-who .lbl{color:var(--muted);font-size:13px;font-weight:700;margin-right:2px}
+    .n-who .chip{border:1px solid #3a3d43;background:#17191c;color:#e8e8e8;border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+    .n-who .chip.on{background:var(--orange);border-color:var(--orange);color:#160a00}
+    .n-who.need .chip{border-color:var(--orange2);animation:nudge .5s}
+    .n-who .edit{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:6px 4px}
+    @keyframes nudge{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+    .dlg textarea{width:100%;min-height:180px;border-radius:10px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:10px 12px;font:inherit;font-size:15px;line-height:1.7;resize:vertical}
     .n-sec{display:flex;flex-direction:column;gap:6px}
     .n-sec h3{margin:6px 0 0;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
     .n-pend{border:1px solid rgba(255,155,61,.45);background:rgba(255,122,0,.07);border-radius:14px;padding:10px 12px}
@@ -227,6 +235,7 @@
           <button class="n-btn ghost" type="button" id="nRefresh" title="重新讀取">↻</button>
           <button class="n-btn ghost" type="button" id="nCfgBtn" title="備註設定">⚙</button>
         </div>
+        <div class="n-who" id="nWho"></div>
         <form class="n-form" id="nForm" autocomplete="off">
           <textarea id="nText" rows="2" placeholder="例：小陳預支 3000｜跟規速調了 2 罐 F8200｜阿明自己裝了來令片｜DRG 空濾沒了｜幫王先生叫火星塞　（Enter 送出，Shift+Enter 換行）"></textarea>
           <button class="n-btn pri" type="submit" id="nAdd">新增</button>
@@ -270,6 +279,19 @@
     </div>
   </div>
 
+  <!-- 備註人員 -->
+  <div class="mask" id="staffDlg" hidden>
+    <div class="dlg">
+      <h3>備註人員</h3>
+      <p>一行一位。所有電腦、平板共用這份名單。</p>
+      <textarea id="staffIn" spellcheck="false"></textarea>
+      <div class="acts">
+        <button class="n-btn ghost" type="button" id="staffCancel">取消</button>
+        <button class="n-btn pri" type="button" id="staffSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 編輯連結 -->
   <div class="mask" id="linkDlg" hidden>
     <div class="dlg">
@@ -304,7 +326,7 @@
       {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",     icon:"📊", url:"https://docs.google.com/spreadsheets/"},
       {id:"rescue", title:"道路救援",      desc:"建立或查看道路救援案件",       icon:"🛟", url:""},
     ];
-    const VERSION = "2026-10-02";
+    const VERSION = "2026-10-02b";
     // ===================================
 
     const $ = id => document.getElementById(id);
@@ -477,7 +499,7 @@
     const N_CATS = ["預支","調撥","員工自用","缺貨","叫貨","其他"];
     const N_ICON = {"預支":"💵","調撥":"🔄","員工自用":"🧑‍🔧","缺貨":"📦","叫貨":"🛒","其他":"📝"};
     const N_CONFIRM = {"預支":true,"調撥":true};
-    const N = { notes:[], hours:[], ready:true, loading:false, err:"" };
+    const N = { notes:[], hours:[], staff:[], who:"", ready:true, loading:false, err:"" };
 
     async function napi(type, body){
       const key = store.get("xc_note_key", "");
@@ -524,13 +546,22 @@
         <div class="n-body">
           ${n.summary ? `<div class="n-sum">${esc(n.summary)}</div>` : ""}
           <div class="n-txt">${esc(n.text)}</div>
-          <div class="n-sub">${catSel}${dirSel}<span>${esc(day + hm(n.created))}</span>${state}</div>
+          <div class="n-sub">${catSel}${dirSel}<span>${esc([n.person, day + hm(n.created)].filter(Boolean).join(" · "))}</span>${state}</div>
         </div>
         ${acts ? `<div class="n-acts">${acts}</div>` : ""}
       </div>`;
     }
 
+    function renderWho(){
+      const w = $("nWho");
+      if (N.err || !N.staff.length) { w.textContent = ""; return; }
+      if (N.who && !N.staff.includes(N.who)) N.who = "";
+      w.innerHTML = '<span class="lbl">誰寫的</span>'
+        + N.staff.map(p => `<button type="button" class="chip${p === N.who ? " on" : ""}" data-who="${esc(p)}">${esc(p)}</button>`).join("")
+        + '<button type="button" class="edit" id="staffBtn" title="編輯人員名單">✎ 人員</button>';
+    }
     function renderNotes(){
+      renderWho();
       const box = $("nBox");
       $("nMeta").textContent = N.err ? "" : [nextSendText(), N.ai ? "AI 分類" : ""].filter(Boolean).join(" · ");
       if (N.err) {
@@ -559,7 +590,7 @@
       N.loading = true;
       try {
         const j = await napi("note-list");
-        Object.assign(N, { notes: j.notes || [], hours: j.hours || [], ready: !!j.ready, ai: !!j.ai, today: j.today, err: "" });
+        Object.assign(N, { notes: j.notes || [], hours: j.hours || [], staff: j.staff || N.staff, ready: !!j.ready, ai: !!j.ai, today: j.today, err: "" });
       } catch (e) {
         N.err = e.message;
         if (!quiet && !e.needKey) toast(e.message, true);
@@ -577,11 +608,16 @@
       e.preventDefault();
       const text = $("nText").value.trim();
       if (!text) return $("nText").focus();
+      if (!N.who) {
+        const w = $("nWho"); w.classList.remove("need"); void w.offsetWidth; w.classList.add("need");
+        return toast("請先點選是誰寫的", true);
+      }
       const btn = $("nAdd"); btn.disabled = true; btn.textContent = "分類中…";
       try {
-        const j = await napi("note-add", { text });
+        const j = await napi("note-add", { text, person: N.who });
         upsert(j.note); N.err = ""; renderNotes();
         $("nText").value = "";
+        N.who = ""; renderWho(); // 每則都要重新選人，才不會記到別人頭上
         toast(N_CONFIRM[j.note.cat] ? `已新增（${j.note.cat}，確認後才會發送）` : `已新增到「${j.note.cat}」`);
       } catch (err) {
         toast(err.message, true);
@@ -630,6 +666,21 @@
       finally { btn.disabled = false; }
     };
     $("nRefresh").onclick = () => loadNotes(false);
+
+    $("nWho").addEventListener("click", e => {
+      const c = e.target.closest("[data-who]");
+      if (c) { N.who = N.who === c.dataset.who ? "" : c.dataset.who; $("nWho").classList.remove("need"); renderWho(); $("nText").focus(); return; }
+      if (e.target.closest("#staffBtn")) { $("staffIn").value = N.staff.join("\n"); $("staffDlg").hidden = false; $("staffIn").focus(); }
+    });
+    $("staffCancel").onclick = () => { $("staffDlg").hidden = true; };
+    $("staffSave").onclick = async () => {
+      const btn = $("staffSave"); btn.disabled = true;
+      try {
+        const j = await napi("note-staff", { staff: $("staffIn").value });
+        N.staff = j.staff; $("staffDlg").hidden = true; renderWho(); toast("人員名單已更新");
+      } catch (err) { toast(err.message, true); }
+      finally { btn.disabled = false; }
+    };
 
     function openNoteCfg(){ $("nKeyIn").value = store.get("xc_note_key", ""); $("nCfg").hidden = false; $("nKeyIn").focus(); }
     $("nCfgBtn").onclick = openNoteCfg;
