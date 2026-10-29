@@ -221,6 +221,14 @@
     .vn-title{font-weight:800;font-size:15px;line-height:1.4}
     .vn-sum{color:#c7cbd1;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
     .vn-link{color:var(--orange2);font-size:13px;font-weight:700;text-decoration:none}
+    .vn-pend{border:1px solid rgba(255,155,61,.45);background:rgba(255,122,0,.07);border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+    .vn-pend > h3{margin:0;font-size:14px;color:var(--orange2)}
+    .vn-draft{border:1px solid #2a2d33;background:#0f1012;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .vn-draft input,.vn-draft textarea{width:100%;border-radius:10px;border:1px solid var(--line);background:#0b0c0e;color:var(--text);padding:8px 10px;font:inherit;font-size:14px;line-height:1.5}
+    .vn-draft input{font-weight:800}
+    .vn-draft textarea{min-height:70px;resize:vertical}
+    .vn-draft .n-acts{justify-content:flex-start}
+    .vn-item.skipped{opacity:.45}
     @media (max-width:560px){ .vn{padding:16px} .vn-list{grid-template-columns:1fr} }
   </style>
 </head>
@@ -271,7 +279,9 @@
         <h2>📢 廠商公告</h2>
         <span class="n-meta" id="vnMeta"></span>
         <button class="n-btn ghost" type="button" id="vnRefresh" title="重新讀取">↻</button>
+        <button class="n-btn ghost" type="button" id="vnCfgBtn" title="官網發布設定">⚙</button>
       </div>
+      <div id="vnPend"></div>
       <div class="vn-filter" id="vnFilter"></div>
       <div class="vn-list" id="vnList"><div class="n-empty">讀取中…</div></div>
     </section>
@@ -302,6 +312,20 @@
       <div class="acts">
         <button class="n-btn ghost" type="button" id="nCfgCancel">取消</button>
         <button class="n-btn pri" type="button" id="nCfgSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 廠商公告：官網發布設定 -->
+  <div class="mask" id="vnCfg" hidden>
+    <div class="dlg">
+      <h3>官網發布設定</h3>
+      <p>輸入 Apps Script「旭馳最新資訊」執行 <b>setupWsKey</b> 後得到的密碼。只會存在這台電腦的瀏覽器，不會放上 GitHub。</p>
+      <label for="vnKeyIn">發布密碼（WS_KEY）</label>
+      <input id="vnKeyIn" type="password" autocomplete="off">
+      <div class="acts">
+        <button class="n-btn ghost" type="button" id="vnCfgCancel">取消</button>
+        <button class="n-btn pri" type="button" id="vnCfgSave">儲存</button>
       </div>
     </div>
   </div>
@@ -354,7 +378,7 @@
       {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",     icon:"📊", url:"https://docs.google.com/spreadsheets/"},
       {id:"stock", title:"SYM車台切結書", desc:"車台&CASE共用", icon:"📊", url:"https://docs.google.com/spreadsheets/d/1MHEPRTRaz_BhTW0SrIsF9q183i_O2n7DtXhtwRqVnYo/edit?usp=drive_link", win:true},
     ];
-    const VERSION = "2026-10-29";
+    const VERSION = "2026-10-29b";
     // ===================================
 
     const $ = id => document.getElementById(id);
@@ -726,34 +750,90 @@
     // 其他電腦或平板新增的備註也同步過來
     setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) loadNotes(true); });
-    // ====== 廠商公告（每天早上由排程整理廠商 LINE 官方帳號消息，確認後更新 vendor-news.json） ======
-    const VN = { items:[], filter:"" };
+    // ====== 廠商公告（排程每天整理廠商 LINE 官方帳號 → vendor-news.json → 這裡確認 → 發布到官網 service.xuchi-moto.com/news） ======
+    const WS_API = "https://script.google.com/macros/s/AKfycbwdTz4DcFqcX9n-b8AlSZghw6jCG6NgjjH7PYlfXVHTIzUQrxt6yVziCPfnm9GiYbYwJg/exec";
+    const VN = { items:[], marks:{}, filter:"", err:"" };
+    async function wsapi(api, body){
+      const key = store.get("xc_ws_key", "");
+      if (!key) { const e = new Error("請先按 ⚙ 輸入官網發布密碼"); e.needKey = true; throw e; }
+      const r = await fetch(WS_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api, key })) });
+      let j; try { j = await r.json(); } catch (e) { throw new Error("官網系統沒有回應（請確認「前台 API」已部署新版本）"); }
+      if (!j.ok) { const e = new Error(j.error === "unauthorized" ? "官網發布密碼不正確，請按 ⚙ 重新輸入" : (j.error || "發生錯誤")); e.needKey = j.error === "unauthorized"; throw e; }
+      if (j.marks) VN.marks = j.marks;
+      return j;
+    }
+    const vnBody = i => [i.summary, i.vendor ? "（消息來源：" + i.vendor + "）" : ""].filter(Boolean).join("\n");
     function renderVN(){
-      const tags = [...new Set(VN.items.map(i => i.tag).filter(Boolean))];
+      const pend = VN.items.filter(i => !VN.marks[i.id]);
+      const done = VN.items.filter(i => VN.marks[i.id]);
+      let ph = "";
+      if (VN.err) ph += `<div class="n-warn">${esc(VN.err)}</div>`;
+      if (pend.length) {
+        ph += `<div class="vn-pend"><h3>⏳ 待確認（${pend.length}）— 可以先改標題內文，按「發布到官網」才會出現在 service.xuchi-moto.com/news</h3>` +
+          pend.map(i => `<div class="vn-draft" data-id="${esc(i.id)}">
+            <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T"))}</span>${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">原始連結 ↗</a>` : ""}</div>
+            <input data-f="title" maxlength="60" value="${esc(i.title)}">
+            <textarea data-f="body" maxlength="2000">${esc(vnBody(i))}</textarea>
+            <div class="n-acts"><button class="n-btn pri" data-pub="${esc(i.id)}">發布到官網</button><button class="n-btn ghost" data-skip="${esc(i.id)}">略過</button></div>
+          </div>`).join("") + "</div>";
+      }
+      $("vnPend").innerHTML = ph;
+      const tags = [...new Set(done.map(i => i.tag).filter(Boolean))];
       $("vnFilter").innerHTML = tags.length > 1
         ? ["", ...tags].map(t => `<button type="button" data-vt="${esc(t)}" class="${t === VN.filter ? "on" : ""}">${esc(t || "全部")}</button>`).join("")
         : "";
-      const list = VN.items.filter(i => !VN.filter || i.tag === VN.filter);
-      const recent = Date.now() - 3 * 864e5;
-      $("vnList").innerHTML = list.length ? list.map(i => `<div class="vn-item${new Date(i.date) > recent ? " new" : ""}">
-          <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T") || i.date)}</span></div>
+      const list = done.filter(i => !VN.filter || i.tag === VN.filter);
+      $("vnList").innerHTML = list.length ? list.map(i => {
+          const m = VN.marks[i.id];
+          return `<div class="vn-item${m === "skipped" ? " skipped" : ""}">
+          <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T"))}</span>${m === "published" ? '<span class="pill sent">已發布官網</span>' : '<span class="pill queue">已略過</span>'}</div>
           <div class="vn-title">${esc(i.title)}</div>
           ${i.summary ? `<div class="vn-sum">${esc(i.summary)}</div>` : ""}
           ${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">查看詳情 ↗</a>` : ""}
-        </div>`).join("") : '<div class="n-empty">目前沒有廠商公告。</div>';
+        </div>`; }).join("") : (pend.length ? "" : '<div class="n-empty">目前沒有廠商公告。每天早上會自動整理廠商 LINE 的新消息放到這裡。</div>');
     }
     async function loadVN(){
       try {
         const r = await fetch("vendor-news.json?t=" + Date.now(), { cache:"no-store" });
         const j = await r.json();
-        VN.items = (j.items || []).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-        $("vnMeta").textContent = j.updated ? "更新於 " + String(j.updated).slice(5, 16).replace("T", " ").replace("-", "/") : "";
+        VN.items = (j.items || []).filter(i => i.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+        $("vnMeta").textContent = j.updated ? "整理於 " + String(j.updated).slice(5, 16).replace("T", " ").replace("-", "/") : "";
       } catch (e) { $("vnMeta").textContent = "讀取失敗"; }
+      try { await wsapi("ws-status"); VN.err = ""; } catch (e) { VN.err = e.message; }
       renderVN();
     }
+    $("vnPend").addEventListener("click", async e => {
+      const pub = e.target.closest("[data-pub]"), skip = e.target.closest("[data-skip]");
+      if (!pub && !skip) return;
+      const card = e.target.closest(".vn-draft"), id = card.dataset.id;
+      const it = VN.items.find(x => x.id === id); if (!it) return;
+      const btn = pub || skip; btn.disabled = true;
+      try {
+        if (pub) {
+          const title = card.querySelector('[data-f="title"]').value.trim(), body = card.querySelector('[data-f="body"]').value.trim();
+          if (!title) { btn.disabled = false; return toast("請輸入標題", true); }
+          if (!confirm(`發布到官網（客人看得到）？\n\n${title}\n\n${body}`)) { btn.disabled = false; return; }
+          btn.textContent = "發布中…";
+          await wsapi("ws-publish", { id, title, body, date: it.date, image: it.image || "" });
+          toast("已發布到官網");
+        } else {
+          await wsapi("ws-skip", { id }); toast("已略過");
+        }
+        VN.err = ""; renderVN();
+      } catch (err) { toast(err.message, true); if (err.needKey) openVnCfg(); btn.disabled = false; if (pub) btn.textContent = "發布到官網"; }
+    });
     $("vnFilter").addEventListener("click", e => { const b = e.target.closest("[data-vt]"); if (b) { VN.filter = b.dataset.vt; renderVN(); } });
     $("vnRefresh").onclick = loadVN;
+    function openVnCfg(){ $("vnKeyIn").value = store.get("xc_ws_key", ""); $("vnCfg").hidden = false; $("vnKeyIn").focus(); }
+    $("vnCfgBtn").onclick = openVnCfg;
+    $("vnCfgCancel").onclick = () => { $("vnCfg").hidden = true; };
+    $("vnCfgSave").onclick = () => {
+      if (!store.set("xc_ws_key", $("vnKeyIn").value.trim())) return toast("這個瀏覽器不能儲存設定", true);
+      $("vnCfg").hidden = true; loadVN();
+    };
+    $("vnKeyIn").addEventListener("keydown", e => { if (e.key === "Enter") $("vnCfgSave").click(); });
     loadVN();
+    setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])") && !document.activeElement?.closest?.(".vn-draft")) loadVN(); }, 10 * 60 * 1000);
   </script>
 </body>
 </html>
