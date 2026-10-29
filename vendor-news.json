@@ -1,6 +1,50 @@
 {
-  "updated": "2026-10-29T14:30:00+08:00",
+  "updated": "2026-10-29T15:40:00+08:00",
   "items": [
+    {
+      "id": "2026-10-29-KOMAX-komax-cygnusx",
+      "date": "2026-10-29",
+      "vendor": "KOMAX",
+      "tag": "新品",
+      "title": "KOMAX 七代勁戰改裝套件：小風鏡＋方向燈封燈罩",
+      "summary": "七代勁戰（CYGNUS X XR）專用小風鏡＋封燈罩，多款材質可選：髮絲碳纖、消光／亮光烤漆、碳纖維，讓車頭更帥氣有型。",
+      "image": "https://desk.xuchi-moto.com/vendor-img/2026-10-29-komax-cygnusx.jpg"
+    },
+    {
+      "id": "2026-10-29-卡西堤-c4pro-single",
+      "date": "2026-10-29",
+      "vendor": "卡西堤光電",
+      "tag": "缺貨停產",
+      "title": "卡西堤 C4 PRO 低調入門組（單燈）停售",
+      "summary": "C4 PRO 低調入門組（單燈）已售罄，之後不再追加供應；C4 PRO 豪快入氣組（雙燈）維持正常販售，不受影響。"
+    },
+    {
+      "id": "2026-10-28-APEXX-fiddle-lights",
+      "date": "2026-10-28",
+      "vendor": "APEXX RACING",
+      "tag": "新品",
+      "title": "APEXX FIDDLE 燈具系列：魚眼頭燈、前後方向燈",
+      "summary": "SYM FIDDLE 專用。魚眼頭燈 NT$3,980、前方向燈 NT$2,380、後方向燈 NT$2,380；前＋後方向燈組 NT$3,980，頭燈＋前後方向燈組 NT$6,980。",
+      "image": "https://desk.xuchi-moto.com/vendor-img/2026-10-28-apexx-fiddle.jpg"
+    },
+    {
+      "id": "2026-10-28-NCY-caliper-bracket",
+      "date": "2026-10-28",
+      "vendor": "NCY",
+      "tag": "促銷",
+      "title": "NCY 螃蟹卡鉗：買卡鉗送指定車款卡鉗座",
+      "summary": "購買 NCY 螃蟹卡鉗即贈指定車款卡鉗座，送完為止。黑色現貨 NT$4,000、訂製顏色 NT$4,200（約 20 個工作天）。適用四／五代勁戰（含 ABS）、六代勁戰、JETS／SR、FORCE／SMAX。",
+      "image": "https://desk.xuchi-moto.com/vendor-img/2026-10-28-ncy-caliper.jpg"
+    },
+    {
+      "id": "2026-10-26-Ghost-halloween",
+      "date": "2026-10-26",
+      "vendor": "極軒商行 GHOST",
+      "tag": "促銷",
+      "title": "GHOST 吉斯特萬聖節品牌日（10/30～11/2）",
+      "summary": "【店家用】經銷店家專屬：出貨金額滿 NT$3,000 送齊格力 2.0 握把套一組，滿 NT$6,000 送萬聖節三色套裝；以此類推（3,000 送一組、6,000 送三組…）。運費不計入出貨金額。",
+      "image": "https://desk.xuchi-moto.com/vendor-img/2026-10-26-ghost-halloween.jpg"
+    },
     {
       "date": "2026-10-28",
       "vendor": "新聲部品",
