@@ -205,6 +205,23 @@
     .toast.err{background:#5c1717;border-color:#a33}
     @media (max-width: 900px){ .hero{grid-template-columns:1fr} .clock-card{flex-direction:row;align-items:baseline;gap:14px;flex-wrap:wrap} }
     @media (max-width: 560px){ .notes{padding:16px} .n-form{flex-direction:column} .n-form .n-btn{padding:12px} }
+    /* ====== 廠商公告 ====== */
+    .vn{margin-top:18px;padding:22px 24px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#131416,#0f1012);box-shadow:var(--shadow)}
+    .vn-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .vn-head h2{margin:0;font-size:20px;font-weight:900;flex:1}
+    .vn-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+    .vn-filter button{border:1px solid #3a3d43;background:#17191c;color:#e8e8e8;border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+    .vn-filter button.on{background:var(--orange);border-color:var(--orange);color:#160a00}
+    .vn-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-height:520px;overflow:auto;padding-right:4px}
+    .vn-item{border:1px solid #23262b;background:#0f1012;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+    .vn-item.new{border-color:rgba(255,155,61,.5)}
+    .vn-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+    .vn-vendor{font-weight:800;color:var(--orange2);font-size:13px}
+    .vn-tag{border-radius:999px;padding:1px 8px;background:#22252a;color:#dfe2e6;font-weight:700}
+    .vn-title{font-weight:800;font-size:15px;line-height:1.4}
+    .vn-sum{color:#c7cbd1;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+    .vn-link{color:var(--orange2);font-size:13px;font-weight:700;text-decoration:none}
+    @media (max-width:560px){ .vn{padding:16px} .vn-list{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -247,6 +264,16 @@
         <div class="date" id="date">----</div>
         <div class="greet" id="greeting"></div>
       </div>
+    </section>
+
+    <section class="vn" id="vendorNews">
+      <div class="vn-head">
+        <h2>📢 廠商公告</h2>
+        <span class="n-meta" id="vnMeta"></span>
+        <button class="n-btn ghost" type="button" id="vnRefresh" title="重新讀取">↻</button>
+      </div>
+      <div class="vn-filter" id="vnFilter"></div>
+      <div class="vn-list" id="vnList"><div class="n-empty">讀取中…</div></div>
     </section>
 
     <div class="section-title">
@@ -327,7 +354,7 @@
       {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",     icon:"📊", url:"https://docs.google.com/spreadsheets/"},
       {id:"stock", title:"SYM車台切結書", desc:"車台&CASE共用", icon:"📊", url:"https://docs.google.com/spreadsheets/d/1MHEPRTRaz_BhTW0SrIsF9q183i_O2n7DtXhtwRqVnYo/edit?usp=drive_link", win:true},
     ];
-    const VERSION = "2026-10-27b";
+    const VERSION = "2026-10-29";
     // ===================================
 
     const $ = id => document.getElementById(id);
@@ -699,6 +726,34 @@
     // 其他電腦或平板新增的備註也同步過來
     setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) loadNotes(true); });
+    // ====== 廠商公告（每天早上由排程整理廠商 LINE 官方帳號消息，確認後更新 vendor-news.json） ======
+    const VN = { items:[], filter:"" };
+    function renderVN(){
+      const tags = [...new Set(VN.items.map(i => i.tag).filter(Boolean))];
+      $("vnFilter").innerHTML = tags.length > 1
+        ? ["", ...tags].map(t => `<button type="button" data-vt="${esc(t)}" class="${t === VN.filter ? "on" : ""}">${esc(t || "全部")}</button>`).join("")
+        : "";
+      const list = VN.items.filter(i => !VN.filter || i.tag === VN.filter);
+      const recent = Date.now() - 3 * 864e5;
+      $("vnList").innerHTML = list.length ? list.map(i => `<div class="vn-item${new Date(i.date) > recent ? " new" : ""}">
+          <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T") || i.date)}</span></div>
+          <div class="vn-title">${esc(i.title)}</div>
+          ${i.summary ? `<div class="vn-sum">${esc(i.summary)}</div>` : ""}
+          ${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">查看詳情 ↗</a>` : ""}
+        </div>`).join("") : '<div class="n-empty">目前沒有廠商公告。</div>';
+    }
+    async function loadVN(){
+      try {
+        const r = await fetch("vendor-news.json?t=" + Date.now(), { cache:"no-store" });
+        const j = await r.json();
+        VN.items = (j.items || []).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+        $("vnMeta").textContent = j.updated ? "更新於 " + String(j.updated).slice(5, 16).replace("T", " ").replace("-", "/") : "";
+      } catch (e) { $("vnMeta").textContent = "讀取失敗"; }
+      renderVN();
+    }
+    $("vnFilter").addEventListener("click", e => { const b = e.target.closest("[data-vt]"); if (b) { VN.filter = b.dataset.vt; renderVN(); } });
+    $("vnRefresh").onclick = loadVN;
+    loadVN();
   </script>
 </body>
 </html>
