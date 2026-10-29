@@ -229,6 +229,7 @@
     .vn-draft textarea{min-height:70px;resize:vertical}
     .vn-draft .n-acts{justify-content:flex-start}
     .vn-item.skipped{opacity:.45}
+    .vn-img{width:100%;max-height:220px;object-fit:contain;background:#000;border-radius:10px}
     @media (max-width:560px){ .vn{padding:16px} .vn-list{grid-template-columns:1fr} }
   </style>
 </head>
@@ -773,6 +774,7 @@
         ph += `<div class="vn-pend"><h3>⏳ 待確認（${pend.length}）— 可以先改標題內文，按「發布到官網」才會出現在 service.xuchi-moto.com/news</h3>` +
           pend.map(i => `<div class="vn-draft" data-id="${esc(i.id)}">
             <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T"))}</span>${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">原始連結 ↗</a>` : ""}</div>
+            ${/^https:\/\//.test(i.image || "") ? `<img class="vn-img" src="${esc(i.image)}" alt="" loading="lazy">` : '<div class="n-warn" style="font-size:12px">沒有圖片，官網會用預設底圖</div>'}
             <input data-f="title" maxlength="60" value="${esc(i.title)}">
             <textarea data-f="body" maxlength="2000">${esc(vnBody(i))}</textarea>
             <div class="n-acts"><button class="n-btn pri" data-pub="${esc(i.id)}">發布到官網</button><button class="n-btn ghost" data-skip="${esc(i.id)}">略過</button></div>
