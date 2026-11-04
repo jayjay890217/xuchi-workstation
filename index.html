@@ -316,7 +316,6 @@
           <span class="n-meta" id="nMeta"></span>
           <button class="n-btn" type="button" id="nSend" title="把還沒發送的備註立刻整理後傳給櫃台">立即發送</button>
           <button class="n-btn ghost" type="button" id="nRefresh" title="重新讀取">↻</button>
-          <button class="n-btn ghost" type="button" id="nCfgBtn" title="備註設定">⚙</button>
         </div>
         <div class="n-who" id="nWho"></div>
         <form class="n-form" id="nForm" autocomplete="off">
@@ -337,7 +336,6 @@
         <h2>📢 廠商公告</h2>
         <span class="n-meta" id="vnMeta"></span>
         <button class="n-btn ghost" type="button" id="vnRefresh" title="重新讀取">↻</button>
-        <button class="n-btn ghost" type="button" id="vnCfgBtn" title="官網發布設定">⚙</button>
       </div>
       <div id="vnPend"></div>
       <div class="vn-filter" id="vnFilter"></div>
@@ -359,34 +357,6 @@
       </div>
     </div>
   </main>
-
-  <!-- 備註設定 -->
-  <div class="mask" id="nCfg" hidden>
-    <div class="dlg">
-      <h3>備註設定</h3>
-      <p>輸入 Apps Script「旭馳 LINE 通知」指令碼屬性裡的 <b>NOTE_KEY</b>。只會存在這台電腦的瀏覽器，不會放上 GitHub。</p>
-      <label for="nKeyIn">備註密碼（NOTE_KEY）</label>
-      <input id="nKeyIn" type="password" autocomplete="off">
-      <div class="acts">
-        <button class="n-btn ghost" type="button" id="nCfgCancel">取消</button>
-        <button class="n-btn pri" type="button" id="nCfgSave">儲存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 廠商公告：官網發布設定 -->
-  <div class="mask" id="vnCfg" hidden>
-    <div class="dlg">
-      <h3>官網發布設定</h3>
-      <p>輸入 Apps Script「旭馳最新資訊」執行 <b>setupWsKey</b> 後得到的密碼。只會存在這台電腦的瀏覽器，不會放上 GitHub。</p>
-      <label for="vnKeyIn">發布密碼（WS_KEY）</label>
-      <input id="vnKeyIn" type="password" autocomplete="off">
-      <div class="acts">
-        <button class="n-btn ghost" type="button" id="vnCfgCancel">取消</button>
-        <button class="n-btn pri" type="button" id="vnCfgSave">儲存</button>
-      </div>
-    </div>
-  </div>
 
   <!-- 備註人員 -->
   <div class="mask" id="staffDlg" hidden>
@@ -465,9 +435,9 @@
     // ====== 功能按鈕清單改放在 Apps Script「旭馳工作台帳號」的 APPS，登入後才拿得到 ======
     // （要新增／修改按鈕：改那邊的 Code.gs 並部署新版本；或在頁面最下方「編輯連結」暫時貼網址）
     const AUTH_API = "https://script.google.com/macros/s/AKfycbyM3jFE1rr1rUhxpvkL9hT-WzLlNIVDimjp0DtWII_Ag470GG01EVOEFIkhx-5J2ou1/exec";
-    const VERSION = "2026-11-03a";
+    const VERSION = "2026-11-04a";
     let APPS = [];
-    const AUTH = { on:false, token:"", keys:{}, me:null };
+    const AUTH = { on:false, token:"", me:null };
     // ===================================
 
     const $ = id => document.getElementById(id);
@@ -492,8 +462,23 @@
       const w = Math.min(1440, screen.availWidth - 40), h = Math.min(960, screen.availHeight - 60);
       const left = Math.max(0, (screen.availWidth - w) / 2), top = Math.max(0, (screen.availHeight - h) / 2);
       const win = window.open(url, "xcw_" + app.id, `popup=yes,width=${w},height=${h},left=${left},top=${top}`);
-      if (win) { try { win.focus(); } catch(e){} }
-      else window.open(url, "xc_" + app.id); // 視窗被擋就改開分頁
+      if (win) { try { win.focus(); } catch(e){} return win; }
+      return window.open(url, "xc_" + app.id); // 視窗被擋就改開分頁
+    }
+
+    // sso：那個系統認工作台登入。先把視窗開好（iPad 要等網路回來才開會被擋），
+    // 拿到一次性通行證（60 秒、用一次）再把網址帶進去
+    async function openSso(app, url){
+      const w = app.win && !isIOS ? openWin(app, "about:blank") : window.open("about:blank", "xc_" + app.id);
+      try {
+        const { ticket } = await aapi("ticket", { token: AUTH.token, app: app.id });
+        if (!w || w.closed) return toast("視窗被擋住了，請允許這個網頁開新視窗", true);
+        w.location.href = url + (url.includes("?") ? "&" : "?") + "ticket=" + ticket;
+      } catch (e) {
+        if (w && !w.closed) w.close();
+        toast(e.message, true);
+        if (e.code === "LOGIN") showGate(e.message);
+      }
     }
 
     let keyNo = 0;
@@ -512,7 +497,8 @@
             // 外部網頁開在固定分頁：重複點同一個功能不會一直開新分頁
             el.target = "xc_" + app.id;
             el.rel = "noopener";
-            if (app.win && !isIOS) el.addEventListener("click", e => { e.preventDefault(); openWin(app, url); });
+            if (app.sso) el.addEventListener("click", e => { e.preventDefault(); openSso(app, url); });
+            else if (app.win && !isIOS) el.addEventListener("click", e => { e.preventDefault(); openWin(app, url); });
           }
         } else {
           el.setAttribute("aria-disabled", "true");
@@ -642,18 +628,16 @@
     const N_CONFIRM = {"預支":true,"調撥":true};
     const N = { notes:[], hours:[], staff:[], who:"", ready:true, loading:false, err:"" };
 
+    // 店內備註、官網發布都認工作台登入（token）；舊密碼 key 只在還沒換新版的後端用得到
+    function unauthorized(){ recheck(); return new Error("登入已過期，請重新登入"); }
     async function napi(type, body){
-      const key = store.get("xc_note_key", "") || AUTH.keys.note || "";
-      if (!key) { const e = new Error("請先按 ⚙ 輸入備註密碼"); e.needKey = true; throw e; }
+      const key = store.get("xc_note_key", "");
       const r = await fetch(NOTE_API + "?type=" + encodeURIComponent(type), {
-        method: "POST", body: JSON.stringify(Object.assign({}, body || {}, { key }))
+        method: "POST", body: JSON.stringify(Object.assign({}, body || {}, { token: AUTH.token, key }))
       });
       let j;
-      try { j = await r.json(); } catch (e) { throw new Error("備註系統沒有回應（請確認 Apps Script 已部署新版本）"); }
-      if (!j.ok) {
-        const e = new Error(j.error === "unauthorized" ? "備註密碼不正確，請按 ⚙ 重新輸入" : (j.error || "發生錯誤"));
-        e.needKey = j.error === "unauthorized"; throw e;
-      }
+      try { j = await r.json(); } catch (e) { throw new Error("備註系統沒有回應，請稍後再試"); }
+      if (!j.ok) throw j.error === "unauthorized" ? unauthorized() : new Error(j.error || "發生錯誤");
       return j;
     }
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -734,7 +718,7 @@
         Object.assign(N, { notes: j.notes || [], hours: j.hours || [], staff: j.staff || N.staff, ready: !!j.ready, ai: !!j.ai, today: j.today, err: "" });
       } catch (e) {
         N.err = e.message;
-        if (!quiet && !e.needKey) toast(e.message, true);
+        if (!quiet) toast(e.message, true);
       } finally {
         N.loading = false; renderNotes();
       }
@@ -762,7 +746,6 @@
         toast(N_CONFIRM[j.note.cat] ? `已新增（${j.note.cat}，確認後才會發送）` : `已新增到「${j.note.cat}」`);
       } catch (err) {
         toast(err.message, true);
-        if (err.needKey) openNoteCfg();
       } finally { btn.disabled = false; btn.textContent = "新增"; $("nText").focus(); }
     };
     $("nText").addEventListener("keydown", e => {
@@ -823,14 +806,6 @@
       finally { btn.disabled = false; }
     };
 
-    function openNoteCfg(){ $("nKeyIn").value = store.get("xc_note_key", ""); $("nCfg").hidden = false; $("nKeyIn").focus(); }
-    $("nCfgBtn").onclick = openNoteCfg;
-    $("nCfgCancel").onclick = () => { $("nCfg").hidden = true; };
-    $("nCfgSave").onclick = () => {
-      if (!store.set("xc_note_key", $("nKeyIn").value.trim())) return toast("這個瀏覽器不能儲存設定", true);
-      $("nCfg").hidden = true; loadNotes(false);
-    };
-    $("nKeyIn").addEventListener("keydown", e => { if (e.key === "Enter") $("nCfgSave").click(); });
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
     });
@@ -842,11 +817,10 @@
     const WS_API = "https://script.google.com/macros/s/AKfycbwdTz4DcFqcX9n-b8AlSZghw6jCG6NgjjH7PYlfXVHTIzUQrxt6yVziCPfnm9GiYbYwJg/exec";
     const VN = { items:[], marks:{}, filter:"", err:"" };
     async function wsapi(api, body){
-      const key = store.get("xc_ws_key", "") || AUTH.keys.ws || "";
-      if (!key) { const e = new Error("請先按 ⚙ 輸入官網發布密碼"); e.needKey = true; throw e; }
-      const r = await fetch(WS_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api, key })) });
-      let j; try { j = await r.json(); } catch (e) { throw new Error("官網系統沒有回應（請確認「前台 API」已部署新版本）"); }
-      if (!j.ok) { const e = new Error(j.error === "unauthorized" ? "官網發布密碼不正確，請按 ⚙ 重新輸入" : (j.error || "發生錯誤")); e.needKey = j.error === "unauthorized"; throw e; }
+      const key = store.get("xc_ws_key", "");
+      const r = await fetch(WS_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api, token: AUTH.token, key })) });
+      let j; try { j = await r.json(); } catch (e) { throw new Error("官網系統沒有回應，請稍後再試"); }
+      if (!j.ok) throw j.error === "unauthorized" ? unauthorized() : new Error(j.error || "發生錯誤");
       if (j.marks) VN.marks = j.marks;
       return j;
     }
@@ -909,18 +883,10 @@
           await wsapi("ws-skip", { id }); toast("已略過");
         }
         VN.err = ""; renderVN();
-      } catch (err) { toast(err.message, true); if (err.needKey) openVnCfg(); btn.disabled = false; if (pub) btn.textContent = "發布到官網"; }
+      } catch (err) { toast(err.message, true); btn.disabled = false; if (pub) btn.textContent = "發布到官網"; }
     });
     $("vnFilter").addEventListener("click", e => { const b = e.target.closest("[data-vt]"); if (b) { VN.filter = b.dataset.vt; renderVN(); } });
     $("vnRefresh").onclick = loadVN;
-    function openVnCfg(){ $("vnKeyIn").value = store.get("xc_ws_key", ""); $("vnCfg").hidden = false; $("vnKeyIn").focus(); }
-    $("vnCfgBtn").onclick = openVnCfg;
-    $("vnCfgCancel").onclick = () => { $("vnCfg").hidden = true; };
-    $("vnCfgSave").onclick = () => {
-      if (!store.set("xc_ws_key", $("vnKeyIn").value.trim())) return toast("這個瀏覽器不能儲存設定", true);
-      $("vnCfg").hidden = true; loadVN();
-    };
-    $("vnKeyIn").addEventListener("keydown", e => { if (e.key === "Enter") $("vnCfgSave").click(); });
 
     // ====== 帳號登入（Apps Script「旭馳工作台帳號」）：沒登入什麼都看不到 ======
     async function aapi(api, body){
@@ -946,7 +912,7 @@
       if (!retry) setTimeout(() => (setup ? $("gName") : $("gUser").value ? $("gPass") : $("gUser")).focus(), 50);
     }
     function showGate(msg){
-      AUTH.on = false; AUTH.token = ""; AUTH.keys = {}; AUTH.me = null; APPS = [];
+      AUTH.on = false; AUTH.token = ""; AUTH.me = null; APPS = [];
       store.set("xc_session", "");
       document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
       $("app").hidden = true; $("gate").hidden = false;
@@ -954,7 +920,7 @@
       setMode("login"); gateMsg(msg || "");
     }
     function applyMe(j){
-      AUTH.me = j; AUTH.keys = j.keys || {}; APPS = j.apps || [];
+      AUTH.me = j; APPS = j.apps || [];
       $("meName").textContent = j.name;
       $("usersBtn").hidden = j.role !== "老闆";
       renderGrid();
