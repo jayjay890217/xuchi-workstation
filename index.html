@@ -231,10 +231,64 @@
     .vn-item.skipped{opacity:.45}
     .vn-img{width:100%;max-height:220px;object-fit:contain;background:#000;border-radius:10px}
     @media (max-width:560px){ .vn{padding:16px} .vn-list{grid-template-columns:1fr} }
+    /* ====== 登入 ====== */
+    .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+    .gate[hidden]{display:none}
+    .gate-box{width:100%;max-width:400px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#131416,#0f1012);box-shadow:var(--shadow);padding:30px 28px}
+    .gate-box .brand{margin-bottom:22px}
+    .gate-box h2{margin:0 0 4px;font-size:20px}
+    .gate-box p{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
+    .gate-box label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+    .gate-box input{width:100%;border-radius:12px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:13px 14px;font:inherit;font-size:16px}
+    .gate-box input:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
+    .gate-box .n-btn.pri{width:100%;margin-top:20px;padding:13px;font-size:16px;border-radius:12px}
+    .gate-msg{min-height:20px;margin-top:12px;font-size:14px;color:#ffb4b4;line-height:1.5}
+    .gate-msg.info{color:var(--muted)}
+    .me{border:1px solid var(--line);background:#121315;color:#e8e8e8;border-radius:999px;padding:9px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+    .head-r{display:flex;gap:10px;align-items:center}
+    .u-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid #1f2125;font-size:14px}
+    .u-row:first-child{border-top:0}
+    .u-row b{flex:1;min-width:0}
+    .u-row small{color:var(--muted);font-weight:400}
+    .u-row.off{opacity:.5}
+    .dlg .row2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+    .dlg .msg{min-height:18px;margin-top:10px;font-size:13px;color:#ffb4b4}
+    @media (max-width:560px){ .head-r .me{padding:8px 10px} }
   </style>
 </head>
 <body>
-  <main class="wrap">
+  <!-- 登入（登入前什麼功能都看不到） -->
+  <section class="gate" id="gate">
+    <form class="gate-box" id="gateForm" autocomplete="on">
+      <div class="brand">
+        <div class="logo">XC</div>
+        <div>
+          <h1>旭馳工作台</h1>
+          <div class="sub">XCGS · 店務管理入口</div>
+        </div>
+      </div>
+      <h2 id="gTitle">請登入</h2>
+      <p id="gHint">輸入你的帳號密碼才能使用工作台。</p>
+      <div id="gSetup" hidden>
+        <label for="gName">你的名字</label>
+        <input id="gName" autocomplete="name" placeholder="例：馬振傑">
+      </div>
+      <div id="gFields">
+        <label for="gUser">帳號</label>
+        <input id="gUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="英文字母或數字">
+        <label for="gPass">密碼</label>
+        <input id="gPass" type="password" autocomplete="current-password">
+      </div>
+      <div id="gSetup2" hidden>
+        <label for="gPass2">再輸入一次密碼</label>
+        <input id="gPass2" type="password" autocomplete="new-password">
+      </div>
+      <button class="n-btn pri" type="submit" id="gBtn">登入</button>
+      <div class="gate-msg info" id="gMsg">連線中…</div>
+    </form>
+  </section>
+
+  <main class="wrap" id="app" hidden>
     <header>
       <div class="brand">
         <div class="logo">XC</div>
@@ -243,8 +297,11 @@
           <div class="sub">XCGS · 店務管理入口</div>
         </div>
       </div>
-      <div class="status" id="netStatus" role="status" aria-live="polite">
-        <i class="dot"></i><span id="netText">網路連線正常</span>
+      <div class="head-r">
+        <div class="status" id="netStatus" role="status" aria-live="polite">
+          <i class="dot"></i><span id="netText">網路連線正常</span>
+        </div>
+        <button class="me" type="button" id="meBtn">👤 <span id="meName"></span></button>
       </div>
     </header>
 
@@ -344,6 +401,53 @@
     </div>
   </div>
 
+  <!-- 我的帳號 -->
+  <div class="mask" id="meDlg" hidden>
+    <div class="dlg">
+      <h3 id="meTitle">我的帳號</h3>
+      <p id="meInfo"></p>
+      <label for="pwOld">目前的密碼</label>
+      <input id="pwOld" type="password" autocomplete="current-password">
+      <div class="row2">
+        <div><label for="pwNew">新密碼（至少 6 個字）</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+        <div><label for="pwNew2">再輸入一次</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+      </div>
+      <div class="msg" id="pwMsg"></div>
+      <div class="acts">
+        <button class="n-btn" type="button" id="usersBtn" hidden>👥 帳號管理</button>
+        <button class="n-btn" type="button" id="logoutBtn">登出</button>
+        <span style="flex:1"></span>
+        <button class="n-btn ghost" type="button" id="meCancel">關閉</button>
+        <button class="n-btn pri" type="button" id="pwSave">改密碼</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 帳號管理（只有老闆） -->
+  <div class="mask" id="usersDlg" hidden>
+    <div class="dlg">
+      <h3>帳號管理</h3>
+      <p>每位員工一個帳號。離職的人把狀態改成「停用」，他的平板最晚 10 分鐘內會被登出。</p>
+      <div id="uList"><div class="n-empty">讀取中…</div></div>
+      <h3 style="margin-top:18px" id="uFormTitle">新增帳號</h3>
+      <div class="row2">
+        <div><label for="uUser">帳號（英文或數字）</label><input id="uUser" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"></div>
+        <div><label for="uName">名字</label><input id="uName" autocomplete="off"></div>
+        <div><label for="uRole">角色</label><select id="uRole"><option>員工</option><option>老闆</option></select></div>
+        <div><label for="uStatus">狀態</label><select id="uStatus"><option>啟用</option><option>停用</option></select></div>
+      </div>
+      <label for="uPass" id="uPassLbl">密碼（至少 6 個字，告訴員工後請他自己改）</label>
+      <input id="uPass" type="text" autocomplete="off" spellcheck="false">
+      <div class="msg" id="uMsg"></div>
+      <div class="acts">
+        <button class="n-btn ghost" type="button" id="uNew">清空，改新增</button>
+        <span style="flex:1"></span>
+        <button class="n-btn ghost" type="button" id="uClose">關閉</button>
+        <button class="n-btn pri" type="button" id="uSave">新增帳號</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 編輯連結 -->
   <div class="mask" id="linkDlg" hidden>
     <div class="dlg">
@@ -358,29 +462,12 @@
   </div>
 
   <script>
-    // ====== 連結設定：只需要改這裡 ======
-    // url 留空 ("") = 尚未設定，卡片會顯示灰色、不能點（也可以在頁面最下方「編輯連結」貼網址）
-    // win: true    = 開在獨立視窗（不是分頁）
-    // iosOnly: true = 只在 iPad / iPhone 顯示（例如捷徑）
-    const APPSHEET_SALES = "https://www.appsheet.com/start/652dbbcb-f80e-4c81-a001-4ec92646882d#appName=NewApp-894803302-26-02-21-4&view=" + encodeURIComponent("業績總覽");
-    const APPS = [
-      {id:"line",   title:"官方LINE",      desc:"回覆客人與處理訊息",         icon:"💬", url:"https://manager.line.biz/account/@370zrkco/", orange:true},
-      {id:"cloud",  title:"雲端系統",      desc:"開啟旭馳店務 工單系統",       icon:"📱", url:"https://script.google.com/macros/s/AKfycbwxbwkVqz91gwdtj7dSgj53IhMAbaURfzFegBsn1yFFO3135b9fOUfE-QU4pNtdNey8/exec", orange:true},
-      {id:"sales",  title:"AppSheet 業績", desc:"業績總覽，獨立視窗查詢",       icon:"📈", url:APPSHEET_SALES, orange:true, win:true},
-      {id:"hbs",    title:"好幫手",        desc:"SYM 頭家好幫手 KEY 單",       icon:"🛵", url:"https://cert.sym.com.tw:8443/cas/login?service=https%3A%2F%2Fsmile2.sym.com.tw%2FeNews%2Fpage1%2FviewDetail.do%3FdocId%3D11168%26curPagNum%3D1%26pageSize%3D5", orange:true, win:true},
-      {id:"newcar", title:"新車客人資料",  desc:"新車登錄、合約、推播經銷商",   icon:"🏍️", url:"https://script.google.com/macros/s/AKfycbwU884oQ4ycq4G-zH0DgqcxWpi07Ab6DKw95k1Uhcw64vHKUUjjPmSE6vW1KdBEU7zV/exec", orange:true, win:true},
-      {id:"site",   title:"旭馳官網",      desc:"www.xuchi-moto.com 官網與最新消息", icon:"🏠", url:"https://www.xuchi-moto.com/", orange:true},
-      {id:"ecpay",  title:"綠界系統",      desc:"金流、發票後台",              icon:"💳", url:"https://vendor.ecpay.com.tw/", win:true},
-      {id:"daka",   title:"打卡之星",      desc:"員工出勤與打卡紀錄",          icon:"⏰", url:"https://teaches.cc/admin/login", win:true},
-      {id:"google", title:"Google Chrome", desc:"開一個新的瀏覽器視窗",        icon:"🌐", url:"https://www.google.com/", win:true},
-      {id:"photos", title:"工作照片",      desc:"進入店內照片整理入口",         icon:"📸", url:"https://photos.google.com/"},
-      {id:"camera", title:"相機",          desc:"開啟 iPad 相機",              icon:"📷", url:"shortcuts://run-shortcut?name=" + encodeURIComponent("開啟相機"), iosOnly:true},
-      {id:"cust",   title:"客戶資料",      desc:"查詢會員、車牌與客戶紀錄",     icon:"👤", url:""},
-      {id:"quote",  title:"報價系統",      desc:"快速建立估價與維修項目",       icon:"🧾", url:""},
-      {id:"sheets", title:"Google 試算表", desc:"查看營運、進貨與工作資料",     icon:"📊", url:"https://docs.google.com/spreadsheets/"},
-      {id:"stock", title:"SYM車台切結書", desc:"車台&CASE共用", icon:"📊", url:"https://docs.google.com/spreadsheets/d/1MHEPRTRaz_BhTW0SrIsF9q183i_O2n7DtXhtwRqVnYo/edit?usp=drive_link", win:true},
-    ];
-    const VERSION = "2026-10-29c";
+    // ====== 功能按鈕清單改放在 Apps Script「旭馳工作台帳號」的 APPS，登入後才拿得到 ======
+    // （要新增／修改按鈕：改那邊的 Code.gs 並部署新版本；或在頁面最下方「編輯連結」暫時貼網址）
+    const AUTH_API = "https://script.google.com/macros/s/AKfycbyM3jFE1rr1rUhxpvkL9hT-WzLlNIVDimjp0DtWII_Ag470GG01EVOEFIkhx-5J2ou1/exec";
+    const VERSION = "2026-11-03a";
+    let APPS = [];
+    const AUTH = { on:false, token:"", keys:{}, me:null };
     // ===================================
 
     const $ = id => document.getElementById(id);
@@ -396,7 +483,7 @@
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const visibleApps = APPS.filter(a => !a.iosOnly || isIOS);
+    let visibleApps = [];
     const grid = $("grid");
     const urlOf = app => (store.get("xc_links", {})[app.id] || app.url || "").trim();
 
@@ -411,6 +498,7 @@
 
     let keyNo = 0;
     function renderGrid(){
+      visibleApps = APPS.filter(a => !a.iosOnly || isIOS);
       grid.textContent = "";
       keyNo = 0;
       visibleApps.forEach(app => {
@@ -460,7 +548,6 @@
       $("footInfo").textContent =
         `旭馳工作台 · 版本 ${VERSION}` + (isIOS || !keyNo ? "" : ` · 數字鍵 1–${keyNo} 快速開啟`);
     }
-    renderGrid();
 
     // ====== 編輯連結（存在這台電腦） ======
     $("linkEditBtn").onclick = () => {
@@ -556,7 +643,7 @@
     const N = { notes:[], hours:[], staff:[], who:"", ready:true, loading:false, err:"" };
 
     async function napi(type, body){
-      const key = store.get("xc_note_key", "");
+      const key = store.get("xc_note_key", "") || AUTH.keys.note || "";
       if (!key) { const e = new Error("請先按 ⚙ 輸入備註密碼"); e.needKey = true; throw e; }
       const r = await fetch(NOTE_API + "?type=" + encodeURIComponent(type), {
         method: "POST", body: JSON.stringify(Object.assign({}, body || {}, { key }))
@@ -748,15 +835,14 @@
       if (e.key === "Escape") document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
     });
 
-    loadNotes(true);
     // 其他電腦或平板新增的備註也同步過來
-    setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) loadNotes(true); });
+    setInterval(() => { if (AUTH.on && !document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (AUTH.on && !document.hidden) loadNotes(true); });
     // ====== 廠商公告（排程每天整理廠商 LINE 官方帳號 → vendor-news.json → 這裡確認 → 發布到官網 service.xuchi-moto.com/news） ======
     const WS_API = "https://script.google.com/macros/s/AKfycbwdTz4DcFqcX9n-b8AlSZghw6jCG6NgjjH7PYlfXVHTIzUQrxt6yVziCPfnm9GiYbYwJg/exec";
     const VN = { items:[], marks:{}, filter:"", err:"" };
     async function wsapi(api, body){
-      const key = store.get("xc_ws_key", "");
+      const key = store.get("xc_ws_key", "") || AUTH.keys.ws || "";
       if (!key) { const e = new Error("請先按 ⚙ 輸入官網發布密碼"); e.needKey = true; throw e; }
       const r = await fetch(WS_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api, key })) });
       let j; try { j = await r.json(); } catch (e) { throw new Error("官網系統沒有回應（請確認「前台 API」已部署新版本）"); }
@@ -835,8 +921,183 @@
       $("vnCfg").hidden = true; loadVN();
     };
     $("vnKeyIn").addEventListener("keydown", e => { if (e.key === "Enter") $("vnCfgSave").click(); });
-    loadVN();
-    setInterval(() => { if (!document.hidden && !document.querySelector(".mask:not([hidden])") && !document.activeElement?.closest?.(".vn-draft")) loadVN(); }, 10 * 60 * 1000);
+
+    // ====== 帳號登入（Apps Script「旭馳工作台帳號」）：沒登入什麼都看不到 ======
+    async function aapi(api, body){
+      let r;
+      try { r = await fetch(AUTH_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api })) }); }
+      catch (e) { throw new Error(navigator.onLine ? "登入系統沒有回應，請稍後再試" : "目前沒有網路，請確認網路後再試"); }
+      let j; try { j = await r.json(); } catch (e) { throw new Error("登入系統沒有回應，請稍後再試"); }
+      if (!j.ok) { const e = new Error(j.error || "發生錯誤"); e.code = j.code; throw e; }
+      return j;
+    }
+    let gMode = "";
+    function gateMsg(t, info){ $("gMsg").textContent = t || ""; $("gMsg").className = "gate-msg" + (info ? " info" : ""); }
+    function setMode(m){
+      gMode = m;
+      const setup = m === "setup", retry = m === "retry";
+      $("gTitle").textContent = setup ? "建立老闆帳號" : retry ? "連不上登入系統" : "請登入";
+      $("gHint").textContent = setup ? "第一次使用：先建立老闆自己的帳號，之後在右上角「帳號管理」幫員工開帳號。"
+        : retry ? "請確認網路正常，再按「重試」。" : "輸入你的帳號密碼才能使用工作台。";
+      $("gSetup").hidden = $("gSetup2").hidden = !setup;
+      $("gFields").hidden = retry;
+      $("gPass").autocomplete = setup ? "new-password" : "current-password";
+      $("gBtn").textContent = setup ? "建立並登入" : retry ? "重試" : "登入";
+      if (!retry) setTimeout(() => (setup ? $("gName") : $("gUser").value ? $("gPass") : $("gUser")).focus(), 50);
+    }
+    function showGate(msg){
+      AUTH.on = false; AUTH.token = ""; AUTH.keys = {}; AUTH.me = null; APPS = [];
+      store.set("xc_session", "");
+      document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
+      $("app").hidden = true; $("gate").hidden = false;
+      $("gPass").value = ""; $("gPass2").value = ""; grid.textContent = "";
+      setMode("login"); gateMsg(msg || "");
+    }
+    function applyMe(j){
+      AUTH.me = j; AUTH.keys = j.keys || {}; APPS = j.apps || [];
+      $("meName").textContent = j.name;
+      $("usersBtn").hidden = j.role !== "老闆";
+      renderGrid();
+    }
+    function enter(j){
+      AUTH.on = true; AUTH.token = j.token;
+      store.set("xc_session", j.token);
+      applyMe(j);
+      $("gate").hidden = true; $("app").hidden = false;
+      gateMsg(""); $("gPass").value = ""; $("gPass2").value = "";
+      loadNotes(true); loadVN();
+    }
+    async function boot(){
+      setMode("login"); $("gFields").hidden = true; gateMsg("連線中…", true);
+      const t = store.get("xc_session", "");
+      try {
+        if (t) {
+          try { const j = await aapi("me", { token: t }); j.token = t; return enter(j); }
+          catch (e) { if (e.code !== "LOGIN") throw e; store.set("xc_session", ""); }
+        }
+        const s = await aapi("status");
+        setMode(s.hasUsers ? "login" : "setup"); gateMsg("");
+      } catch (e) { setMode("retry"); gateMsg(e.message); }
+    }
+    $("gateForm").onsubmit = async e => {
+      e.preventDefault();
+      if (gMode === "retry") return boot();
+      const user = $("gUser").value.trim(), pass = $("gPass").value;
+      let api = "login";
+      const body = { user, pass };
+      if (gMode === "setup") {
+        body.name = $("gName").value.trim(); api = "setup";
+        if (!body.name) { gateMsg("請輸入你的名字"); return $("gName").focus(); }
+      }
+      if (!user) { gateMsg("請輸入帳號"); return $("gUser").focus(); }
+      if (!pass) { gateMsg("請輸入密碼"); return $("gPass").focus(); }
+      if (gMode === "setup") {
+        if (pass.length < 6) { gateMsg("密碼至少 6 個字"); return $("gPass").focus(); }
+        if (pass !== $("gPass2").value) { gateMsg("兩次輸入的密碼不一樣"); return $("gPass2").focus(); }
+      }
+      const btn = $("gBtn"), txt = btn.textContent;
+      btn.disabled = true; btn.textContent = "登入中…"; gateMsg("");
+      try { enter(await aapi(api, body)); }
+      catch (err) { gateMsg(err.message); $("gPass").value = ""; $("gPass2").value = ""; $("gPass").focus(); }
+      finally { btn.disabled = false; btn.textContent = txt; }
+    };
+
+    // 每 10 分鐘（和切回這個畫面時）確認帳號還有效：員工被停用就會被登出；按鈕清單也會更新
+    async function recheck(){
+      if (!AUTH.on || !navigator.onLine) return;
+      try { applyMe(await aapi("me", { token: AUTH.token })); }
+      catch (e) { if (e.code === "LOGIN") showGate(e.message); }
+    }
+    setInterval(recheck, 10 * 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) recheck(); });
+    // 到了每天清晨的登出時間，沒網路也照樣鎖起來
+    setInterval(() => { if (AUTH.on && AUTH.me && AUTH.me.exp < Date.now()) showGate("已到每天的登出時間，請重新登入"); }, 60 * 1000);
+
+    // ====== 我的帳號：改密碼、登出 ======
+    $("meBtn").onclick = () => {
+      const m = AUTH.me;
+      const until = new Date(m.exp).toLocaleString("zh-TW", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit", hour12:false });
+      $("meTitle").textContent = "👤 " + m.name;
+      $("meInfo").textContent = `帳號 ${m.user}（${m.role}）。這台會保持登入到 ${until}，每天清晨 4 點自動登出。離開店裡或借別人用之前，請按「登出」。`;
+      ["pwOld","pwNew","pwNew2"].forEach(id => $(id).value = ""); $("pwMsg").textContent = "";
+      $("meDlg").hidden = false;
+    };
+    $("meCancel").onclick = () => { $("meDlg").hidden = true; };
+    $("logoutBtn").onclick = () => {
+      const t = AUTH.token;
+      showGate("已登出");
+      aapi("logout", { token: t }).catch(() => {});
+    };
+    $("pwSave").onclick = async () => {
+      const old = $("pwOld").value, pass = $("pwNew").value, msg = $("pwMsg");
+      if (!old) { msg.textContent = "請輸入目前的密碼"; return $("pwOld").focus(); }
+      if (pass.length < 6) { msg.textContent = "新密碼至少 6 個字"; return $("pwNew").focus(); }
+      if (pass !== $("pwNew2").value) { msg.textContent = "兩次輸入的新密碼不一樣"; return $("pwNew2").focus(); }
+      const btn = $("pwSave"); btn.disabled = true; msg.textContent = "";
+      try {
+        const j = await aapi("password", { token: AUTH.token, old, pass });
+        AUTH.token = j.token; store.set("xc_session", j.token); applyMe(j);
+        $("meDlg").hidden = true; toast("密碼已改好（其他平板要用新密碼重新登入）");
+      } catch (e) { msg.textContent = e.message; if (e.code === "LOGIN") showGate(e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    // ====== 帳號管理（只有老闆）======
+    let U = [], uEditing = "";
+    function uReset(){
+      uEditing = "";
+      $("uUser").disabled = false; $("uUser").value = ""; $("uName").value = ""; $("uPass").value = "";
+      $("uRole").value = "員工"; $("uStatus").value = "啟用";
+      $("uFormTitle").textContent = "新增帳號"; $("uSave").textContent = "新增帳號";
+      $("uPassLbl").textContent = "密碼（至少 6 個字，告訴員工後請他自己改）"; $("uMsg").textContent = "";
+    }
+    function renderUsers(list){
+      U = list || [];
+      $("uList").innerHTML = U.map(u => `<div class="u-row${u.status === "停用" ? " off" : ""}">
+          <b>${esc(u.name)} <small>${esc(u.user)} · ${esc(u.role)}${u.status === "停用" ? " · 已停用" : ""}${u.last ? " · 最後登入 " + esc(u.last) : ""}</small></b>
+          <button class="n-btn" type="button" data-u="${esc(u.user)}">修改</button></div>`).join("")
+        || '<div class="n-empty">還沒有帳號</div>';
+    }
+    $("usersBtn").onclick = async () => {
+      $("meDlg").hidden = true; $("usersDlg").hidden = false; uReset();
+      $("uList").innerHTML = '<div class="n-empty">讀取中…</div>';
+      try { renderUsers((await aapi("users", { token: AUTH.token })).users); }
+      catch (e) { $("uList").innerHTML = `<div class="n-warn">${esc(e.message)}</div>`; if (e.code === "LOGIN") showGate(e.message); }
+    };
+    $("uList").onclick = e => {
+      const b = e.target.closest("[data-u]"); if (!b) return;
+      const u = U.find(x => x.user === b.dataset.u); if (!u) return;
+      uEditing = u.user;
+      $("uUser").value = u.user; $("uUser").disabled = true; $("uName").value = u.name;
+      $("uRole").value = u.role; $("uStatus").value = u.status === "停用" ? "停用" : "啟用"; $("uPass").value = "";
+      $("uFormTitle").textContent = "修改「" + u.name + "」"; $("uSave").textContent = "儲存修改";
+      $("uPassLbl").textContent = "重設密碼（不改就留空）"; $("uMsg").textContent = "";
+      $("uName").focus();
+    };
+    $("uNew").onclick = uReset;
+    $("uClose").onclick = () => { $("usersDlg").hidden = true; };
+    $("uSave").onclick = async () => {
+      const body = { token: AUTH.token, user: uEditing || $("uUser").value.trim(), name: $("uName").value.trim(),
+                     role: $("uRole").value, status: $("uStatus").value, pass: $("uPass").value.trim() };
+      const msg = $("uMsg");
+      if (!uEditing) {
+        if (!body.user) { msg.textContent = "請輸入帳號"; return $("uUser").focus(); }
+        if (!body.name) { msg.textContent = "請輸入名字"; return $("uName").focus(); }
+        if (!body.pass) { msg.textContent = "新帳號要設密碼"; return $("uPass").focus(); }
+      }
+      if (body.pass && body.pass.length < 6) { msg.textContent = "密碼至少 6 個字"; return $("uPass").focus(); }
+      const btn = $("uSave"); btn.disabled = true; msg.textContent = "";
+      try {
+        const j = await aapi("user-save", body);
+        renderUsers(j.users);
+        toast(uEditing ? "已儲存「" + body.name + "」" : "已新增帳號 " + body.user.toLowerCase());
+        uReset();
+      } catch (e) { msg.textContent = e.message; if (e.code === "LOGIN") showGate(e.message); }
+      finally { btn.disabled = false; }
+    };
+
+    boot();
+    setInterval(() => { if (AUTH.on && !document.hidden &&!document.querySelector(".mask:not([hidden])") && !document.activeElement?.closest?.(".vn-draft")) loadVN(); }, 10 * 60 * 1000);
   </script>
 </body>
 </html>
