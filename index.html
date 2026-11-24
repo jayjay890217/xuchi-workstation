@@ -108,6 +108,19 @@ button.tag{border:0;font:inherit;font-size:12px;cursor:pointer}
 .ib svg{width:16px;height:16px}
 .nfoot{padding:0 18px 14px;display:flex;justify-content:center}
 .nwa{display:flex;gap:6px}
+/* 後台／我的帳號的表單（沿用 .nadd 底色、.btn、變數） */
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fgrid label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.fgrid input,.fgrid select{height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 10px;font:inherit;font-size:15px;outline:0}
+.fgrid input:focus,.fgrid select:focus{border-color:var(--ink)}
+.fgrid input:disabled{color:var(--mute)}
+.fgrid .full{grid-column:1/-1}
+.chkrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;color:var(--ink);font-size:14px}
+.chkrow label{display:flex;gap:6px;align-items:center;color:var(--ink)}
+.chkrow .s{font-size:13px;color:var(--mute)}
+.facts{display:flex;gap:8px;flex-wrap:wrap}
+.btn svg.i{width:16px;height:16px}
+@media(max-width:600px){.fgrid{grid-template-columns:minmax(0,1fr)}}
 .nw .s a{color:var(--mute)}
 .grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
 .ch{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -212,6 +225,7 @@ td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
 <symbol id="image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
 <symbol id="camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
 <symbol id="table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
 <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
 </svg>
 
@@ -242,7 +256,7 @@ td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
   <div class="ws"><div class="l">目前資料</div><b>旭馳車業</b><div class="s" id="wsS">讀取中…</div></div>
   <nav>
     <div class="ngrp">每天</div>
-    <a class="on" href="#" data-go="top" title="今日總覽"><svg class="i"><use href="#home"/></svg><span class="lb">今日總覽</span></a>
+    <a class="on" href="#/" data-go="top" title="今日總覽"><svg class="i"><use href="#home"/></svg><span class="lb">今日總覽</span></a>
     <a href="#" data-app="cloud" title="KEY 單"><svg class="i"><use href="#wrench"/></svg><span class="lb">KEY 單</span><span class="ct num" id="navKey">—</span><i class="dot"></i></a>
     <a href="#" data-app="cloud" title="報價：打開 KEY單 的「報價估價」"><svg class="i"><use href="#file"/></svg><span class="lb">報價</span><span class="ct num" id="navQuote">—</span><i class="dot"></i></a>
     <a href="#" data-go="notesCard" title="店務筆記"><svg class="i"><use href="#note"/></svg><span class="lb">店務筆記</span><span class="ct num" id="navNotes">3</span><i class="dot"></i></a>
@@ -250,15 +264,16 @@ td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
     <div class="ngrp">管理</div>
     <a href="#" data-app="shop" title="輪胎批發：打開店家叫貨後台"><svg class="i"><use href="#tire"/></svg><span class="lb">輪胎批發</span></a>
     <a href="#" data-app="cloud" title="月報：打開 KEY單（老闆模式的「業績」分頁）"><svg class="i"><use href="#chart"/></svg><span class="lb">月報</span></a>
+    <a href="#/admin" data-view="admin" id="navAdmin" title="後台：工具捷徑按鈕、帳號" hidden><svg class="i"><use href="#gear"/></svg><span class="lb">後台</span></a>
   </nav>
-  <button class="me" id="meBtn" type="button" title="登出"><div class="av" id="meAv">旭</div><div><b>櫃台電腦</b><span id="meSub">大家共用</span></div></button>
+  <button class="me" id="meBtn" type="button" title="我的帳號：改密碼、登出"><div class="av" id="meAv">旭</div><div><b>櫃台電腦</b><span id="meSub">大家共用</span></div></button>
 </aside>
 
 <main id="top">
   <div class="top">
     <button class="hb" id="hb" aria-label="收合選單" aria-controls="side"><svg class="i"><use href="#menu"/></svg></button>
-    <div><h1>今日總覽</h1><p id="today"></p></div>
-    <div class="act">
+    <div><h1 id="vTitle">今日總覽</h1><p id="today"></p></div>
+    <div class="act" id="topAct">
       <label class="search"><svg class="i"><use href="#search"/></svg><input id="q" placeholder="搜尋車牌、客人、工單"></label>
       <button class="btn pri" id="newKey" type="button"><svg class="i"><use href="#plus"/></svg>新增 KEY 單</button>
     </div>
@@ -266,6 +281,7 @@ td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
 
   <div class="card offline" id="offline" hidden><span class="pill bad">離線中</span><span class="s">網路斷了，工單請改用 AppSheet 輸入，網路恢復後資料會自動同步。</span></div>
 
+  <div id="vHome">
   <section class="kpis">
     <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#wrench"/></svg></span>今日工單</div><b class="num" id="kToday">—</b><div class="d" id="kTodayD">讀取中…</div></div>
     <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#file"/></svg></span>待處理報價</div><b class="num" id="kQuote">—</b><div class="d" id="kQuoteD">讀取中…</div></div>
@@ -303,6 +319,9 @@ td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
   </section>
 
   <p class="sample">今日工單、報價、機油預付是 KEY單 的真資料（約 2 分鐘更新一次）；店務筆記會傳 LINE；廠商公告按「發佈」會上官網。</p>
+  </div>
+  <div id="vAdmin" hidden></div>
+  <div id="vMe" hidden></div>
 </main>
 </div>
 
@@ -567,7 +586,7 @@ document.addEventListener('click',e=>{
  const el=e.target.closest('[data-app]');
  if(el){e.preventDefault();const a=appById(el.dataset.app);if(a&&a.url){openApp(a);setOpen(false);}return;}
  const go=e.target.closest('[data-go]');
- if(go){e.preventDefault();setOpen(false);const t=$(go.dataset.go);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});return;}
+ if(go){e.preventDefault();setOpen(false);const back=VIEW!=='home';if(back)location.hash='#/';const t=$(go.dataset.go);if(t)setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'start'}),back?60:0);return;}
 });
 $('newKey').addEventListener('click',()=>openApp(appById('cloud')));
 
@@ -583,6 +602,191 @@ $('close').addEventListener('click',()=>setOpen(false));
 $('shade').addEventListener('click',()=>setOpen(false));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
 mq.addEventListener('change',()=>setOpen(false));
+// ====== 頁面切換：#/ 今日總覽、#/admin 後台（老闆）、#/me 我的帳號 ======
+const VIEWS={home:'今日總覽',admin:'工作台後台',me:'我的帳號'};
+let VIEW='home';
+function route(){
+ let v=(location.hash.match(/^#\/(\w+)/)||[])[1]||'home';
+ if(!VIEWS[v]||(v==='admin'&&!(AUTH.me&&AUTH.me.role==='老闆')))v='home';
+ VIEW=v;
+ $('vTitle').textContent=VIEWS[v];
+ $('vHome').hidden=v!=='home';$('vAdmin').hidden=v!=='admin';$('vMe').hidden=v!=='me';
+ $('topAct').hidden=v!=='home';
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',(a.dataset.view||'')===v||(v==='home'&&a.dataset.go==='top')));
+ setOpen(false);
+ if(v==='admin'&&!ADM.cfg&&!ADM.loading)loadAdmin();
+ if(v==='admin')drawAdmin();
+ if(v==='me')drawMe();
+ window.scrollTo(0,0);
+}
+addEventListener('hashchange',route);
+
+// ====== 後台（只有老闆）：工具捷徑按鈕＋帳號 ======
+const ROLES=['老闆','員工'];
+const ADM={cfg:null,meta:null,hasPrev:false,def:null,draft:null,edit:-1,users:[],uEdit:null,err:'',msg:'',uMsg:'',loading:false,saving:false};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const dirty=()=>ADM.cfg&&JSON.stringify(ADM.draft)!==JSON.stringify(ADM.cfg);
+const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return u?String(u).slice(0,30):'';}};
+async function loadAdmin(){
+ ADM.loading=true;drawAdmin();
+ try{
+  const j=await aapi('cfg-get',{token:AUTH.token});
+  Object.assign(ADM,{cfg:j.cfg,meta:j.meta||{},hasPrev:!!j.hasPrev,def:j.def,draft:clone(j.cfg),edit:-1,err:''});
+  ADM.users=(await aapi('users',{token:AUTH.token})).users||[];
+ }catch(e){if(e.code==='LOGIN'){ADM.loading=false;return showGate(e.message);}ADM.err=e.message;}
+ ADM.loading=false;drawAdmin();
+}
+function appForm(a){
+ const w=!!a.win,hide=a.group==='hide';
+ return `<form class="nadd" id="aForm" autocomplete="off">
+  <div class="fgrid">
+   <label>名稱<input name="title" maxlength="16" value="${esc(a.title)}" required></label>
+   <label>說明<input name="desc" maxlength="40" value="${esc(a.desc)}"></label>
+   <label class="full">網址${a.sso?'（這格有免密碼登入，改網址就會取消）':''}<input name="url" value="${esc(a.url)}" placeholder="https://…" inputmode="url" autocapitalize="off" spellcheck="false"></label>
+   <div class="full chkrow"><span class="s">誰看得到</span>${ROLES.map(r=>`<label><input type="checkbox" name="role" value="${r}"${(a.roles||ROLES).includes(r)?' checked':''}>${r}</label>`).join('')}
+    <label><input type="checkbox" name="hide"${hide?' checked':''}>先藏起來</label><label><input type="checkbox" name="win"${w?' checked':''}>開成獨立視窗</label></div>
+  </div>
+  <div class="s${ADM.msg?' err':''}" id="aMsg">${esc(ADM.msg||'按「完成」先放進清單，最後按上面的「儲存」才會生效。')}</div>
+  <div class="facts"><button class="btn sm pri" type="submit">完成</button><button class="btn sm" type="button" data-act="cancel">取消</button>${a.id==='cloud'?'':'<button class="btn sm" type="button" data-act="del">刪除這個按鈕</button>'}</div>
+ </form>`;
+}
+function userForm(){
+ const u=ADM.uEdit||{};
+ const isNew=!u.user;
+ return `<form class="nadd" id="uForm" autocomplete="off">
+  <div class="fgrid">
+   <label>帳號（英文或數字）<input name="user" value="${esc(u.user||'')}" ${isNew?'':'disabled'} autocapitalize="off" spellcheck="false"></label>
+   <label>名字<input name="name" value="${esc(u.name||'')}"></label>
+   <label>角色<select name="role">${ROLES.map(r=>`<option${(u.role||'員工')===r?' selected':''}>${r}</option>`).join('')}</select></label>
+   <label>狀態<select name="status">${['啟用','停用'].map(s=>`<option${(u.status||'啟用')===s?' selected':''}>${s}</option>`).join('')}</select></label>
+   <label class="full">${isNew?'密碼（至少 6 個字，告訴員工後請他自己改）':'重設密碼（不改就留空）'}<input name="pass" type="text" autocomplete="off" spellcheck="false"></label>
+  </div>
+  <div class="s${ADM.uMsg?' err':''}">${esc(ADM.uMsg||'停用的人，他的電腦最晚 10 分鐘內會被登出。')}</div>
+  <div class="facts"><button class="btn sm pri" type="submit">${isNew?'新增帳號':'儲存修改'}</button><button class="btn sm" type="button" data-act="ucancel">取消</button></div>
+ </form>`;
+}
+function drawAdmin(){
+ const el=$('vAdmin');
+ if(!ADM.cfg){el.innerHTML=`<div class="card"><div class="empty">${esc(ADM.err||'讀取中…')}</div></div>`;return;}
+ const D=ADM.draft,m=ADM.meta||{};
+ const rows=D.apps.map((a,i)=>`<tr><td data-l="順序"><span class="facts nowrap"><button class="btn sm" type="button" data-act="up" data-i="${i}" ${i?'':'disabled'} aria-label="上移">↑</button><button class="btn sm" type="button" data-act="down" data-i="${i}" ${i<D.apps.length-1?'':'disabled'} aria-label="下移">↓</button></span></td>
+  <td data-l="按鈕"><div><div class="t">${esc(a.title)}</div><div class="s">${esc(a.desc||'')}</div></div></td>
+  <td data-l="網址" class="nowrap">${a.url?esc(hostOf(a.url)):'<span class="tag">沒有網址</span>'}</td>
+  <td data-l="誰看得到"><span class="nowrap">${(a.roles||ROLES).map(r=>`<span class="tag">${esc(r)}</span>`).join(' ')}</span></td>
+  <td data-l="狀態">${a.group==='hide'?'<span class="pill wait">隱藏</span>':a.id==='cloud'?'<span class="pill ok">左側選單</span>':'<span class="pill ok">顯示</span>'}</td>
+  <td data-l="" class="n"><button class="btn sm" type="button" data-act="edit" data-i="${i}">修改</button></td></tr>`).join('');
+ const urows=ADM.users.map(u=>`<tr><td data-l="名字"><div><div class="t">${esc(u.name)}</div><div class="s">${esc(u.user)}</div></div></td>
+  <td data-l="角色"><span class="tag">${esc(u.role)}</span></td>
+  <td data-l="狀態">${u.status==='停用'?'<span class="pill bad">停用</span>':'<span class="pill ok">啟用</span>'}</td>
+  <td data-l="最後登入" class="nowrap">${esc(u.last||'—')}</td>
+  <td data-l="" class="n"><button class="btn sm" type="button" data-act="uedit" data-u="${esc(u.user)}">修改</button></td></tr>`).join('');
+ el.innerHTML=`<div class="card" style="margin-bottom:14px">
+   <div class="ch"><h2>工具捷徑按鈕</h2><span class="sub">${dirty()?'有修改還沒儲存':m.at?`上次修改 ${esc(m.at)}（${esc(m.by||'')}）`:'目前用的是預設按鈕'}</span>
+    <div class="r"><button class="btn sm" type="button" data-act="add">${ic('plus')}新增按鈕</button>${ADM.hasPrev?'<button class="btn sm" type="button" data-act="undo">還原上一版</button>':''}<button class="btn sm pri" type="button" data-act="save" ${dirty()&&!ADM.saving?'':'disabled'}>${ADM.saving?'儲存中…':'儲存'}</button></div></div>
+   ${ADM.edit>=0&&D.apps[ADM.edit]?appForm(D.apps[ADM.edit]):''}
+   <div class="scroll"><table class="stack"><thead><tr><th>順序</th><th>按鈕</th><th>網址</th><th>誰看得到</th><th>狀態</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>
+  <div class="card">
+   <div class="ch"><h2>帳號</h2><span class="sub">每位員工一個帳號</span><div class="r"><button class="btn sm" type="button" data-act="unew">${ic('plus')}新增帳號</button></div></div>
+   ${ADM.uEdit?userForm():''}
+   <div class="scroll"><table class="stack"><thead><tr><th>名字</th><th>角色</th><th>狀態</th><th>最後登入</th><th></th></tr></thead><tbody>${urows||'<tr><td colspan="5" class="empty">還沒有帳號</td></tr>'}</tbody></table></div>
+  </div>`;
+ const f=$('aForm')||$('uForm');if(f&&!f.dataset.seen){f.dataset.seen=1;const x=f.querySelector('input:not([disabled])');if(x)x.focus();}
+}
+$('vAdmin').addEventListener('click',async e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const act=b.dataset.act,i=+b.dataset.i,D=ADM.draft;
+ if(act==='up'||act==='down'){const j=act==='up'?i-1:i+1;[D.apps[i],D.apps[j]]=[D.apps[j],D.apps[i]];if(ADM.edit===i)ADM.edit=j;else if(ADM.edit===j)ADM.edit=i;drawAdmin();return;}
+ if(act==='edit'){ADM.edit=i;ADM.msg='';drawAdmin();return;}
+ if(act==='cancel'){if(D.apps[ADM.edit]&&D.apps[ADM.edit]._new)D.apps.splice(ADM.edit,1);ADM.edit=-1;ADM.msg='';drawAdmin();return;}
+ if(act==='add'){D.apps.push({id:'n'+Date.now().toString(36),title:'新按鈕',desc:'',icon:'⭐',url:'',group:'web',roles:[...ROLES],_new:1});ADM.edit=D.apps.length-1;ADM.msg='';drawAdmin();return;}
+ if(act==='del'){const a=D.apps[ADM.edit];if(a&&confirm(`刪除「${a.title}」？（按「儲存」才會生效；不想顯示也可以勾「先藏起來」）`)){D.apps.splice(ADM.edit,1);ADM.edit=-1;drawAdmin();}return;}
+ if(act==='save'){
+  if(!D.apps.some(a=>a.group!=='hide'&&(a.roles||[]).includes('老闆')))return alert('至少要留一個老闆看得到的按鈕');
+  ADM.saving=true;drawAdmin();
+  try{
+   const out=clone(D);out.apps.forEach(a=>delete a._new);
+   const j=await aapi('cfg-save',{token:AUTH.token,cfg:out});
+   Object.assign(ADM,{cfg:j.cfg,draft:clone(j.cfg),meta:j.meta||{},hasPrev:!!j.hasPrev,edit:-1});
+   await recheck();alert('已儲存。其他電腦最晚 10 分鐘內會更新（重新整理馬上變）。');
+  }catch(err){if(err.code==='LOGIN')return showGate(err.message);alert(err.message);}
+  finally{ADM.saving=false;drawAdmin();}
+  return;
+ }
+ if(act==='undo'){
+  if(!confirm('把工具捷徑換回「上一次儲存前」的樣子？（馬上生效，再按一次可以換回來）'))return;
+  try{const j=await aapi('cfg-undo',{token:AUTH.token});Object.assign(ADM,{cfg:j.cfg,draft:clone(j.cfg),meta:j.meta||{},hasPrev:!!j.hasPrev,edit:-1});await recheck();}
+  catch(err){alert(err.message);}
+  drawAdmin();return;
+ }
+ if(act==='unew'){ADM.uEdit={};ADM.uMsg='';drawAdmin();return;}
+ if(act==='uedit'){ADM.uEdit=ADM.users.find(u=>u.user===b.dataset.u)||null;ADM.uMsg='';drawAdmin();return;}
+ if(act==='ucancel'){ADM.uEdit=null;ADM.uMsg='';drawAdmin();return;}
+});
+$('vAdmin').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const f=e.target,g=n=>f.elements[n];
+ if(f.id==='aForm'){
+  const a=ADM.draft.apps[ADM.edit];if(!a)return;
+  const title=g('title').value.trim(),url=g('url').value.trim(),roles=[...f.querySelectorAll('[name=role]:checked')].map(x=>x.value);
+  const bad=!title?'請填名稱':url&&!/^(https?|shortcuts):\/\//i.test(url)?'網址要以 https:// 開頭':!roles.length?'至少要勾一種人看得到':'';
+  if(bad){ADM.msg=bad;drawAdmin();return;}
+  if(a.sso&&url!==a.url)delete a.sso;
+  Object.assign(a,{title,desc:g('desc').value.trim(),url,roles,win:g('win').checked});
+  if(!a.win)delete a.win;
+  a.group=g('hide').checked?'hide':(a.group==='hide'?'web':a.group||'web');
+  delete a._new;ADM.edit=-1;ADM.msg='';drawAdmin();
+ }else if(f.id==='uForm'){
+  const old=ADM.uEdit||{},isNew=!old.user;
+  const body={token:AUTH.token,user:isNew?g('user').value.trim():old.user,name:g('name').value.trim(),role:g('role').value,status:g('status').value,pass:g('pass').value.trim()};
+  const bad=isNew&&!body.user?'請輸入帳號':!body.name?'請輸入名字':isNew&&!body.pass?'新帳號要設密碼':body.pass&&body.pass.length<6?'密碼至少 6 個字':'';
+  if(bad){ADM.uMsg=bad;drawAdmin();return;}
+  const btn=f.querySelector('[type=submit]');btn.disabled=true;
+  try{const j=await aapi('user-save',body);ADM.users=j.users||[];ADM.uEdit=null;ADM.uMsg='';}
+  catch(err){if(err.code==='LOGIN')return showGate(err.message);ADM.uMsg=err.message;}
+  drawAdmin();
+ }
+});
+
+// ====== 我的帳號：改密碼、登出 ======
+let ME_MSG='';
+function drawMe(){
+ const m=AUTH.me;if(!m)return;
+ const until=new Date(m.exp).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+ $('vMe').innerHTML=`<div class="grid">
+  <div class="card">
+   <div class="ch"><h2>${esc(m.name)}</h2><span class="sub">帳號 ${esc(m.user)}</span><div class="r"><span class="tag">${esc(m.role)}</span></div></div>
+   <ul class="notes"><li><div></div><div><div class="nt">這台電腦會保持登入到 <span class="num nowrap">${esc(until)}</span></div><div class="nm">每天清晨 4 點自動登出。離開店裡或借別人用之前，請按登出。</div></div><div></div></li></ul>
+   <div class="nfoot"><button class="btn" type="button" id="meOut">${ic('x')}登出</button></div>
+  </div>
+  <div class="card">
+   <div class="ch"><h2>改密碼</h2><span class="sub">改好後，其他電腦要用新密碼重新登入</span></div>
+   <form class="nadd" id="pwForm" autocomplete="off">
+    <div class="fgrid">
+     <label class="full">目前的密碼<input name="old" type="password" autocomplete="current-password"></label>
+     <label>新密碼（至少 6 個字）<input name="pass" type="password" autocomplete="new-password"></label>
+     <label>再輸入一次<input name="pass2" type="password" autocomplete="new-password"></label>
+    </div>
+    <div class="s${ME_MSG?' err':''}">${esc(ME_MSG||'　')}</div>
+    <div class="facts"><button class="btn sm pri" type="submit">改密碼</button></div>
+   </form>
+  </div></div>`;
+}
+$('vMe').addEventListener('click',e=>{
+ if(!e.target.closest('#meOut'))return;
+ if(!confirm(`${AUTH.me.name} 要登出嗎？`))return;
+ const t=AUTH.token;location.hash='#/';showGate('已登出');aapi('logout',{token:t}).catch(()=>{});
+});
+$('vMe').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const f=e.target,old=f.elements.old.value,pass=f.elements.pass.value,pass2=f.elements.pass2.value;
+ ME_MSG=!old?'請輸入目前的密碼':pass.length<6?'新密碼至少 6 個字':pass!==pass2?'兩次輸入的新密碼不一樣':'';
+ if(ME_MSG)return drawMe();
+ const b=f.querySelector('[type=submit]');b.disabled=true;
+ try{const j=await aapi('password',{token:AUTH.token,old,pass});j.token=j.token||AUTH.token;AUTH.token=j.token;store.set('xc_session',j.token);applyMe(j);ME_MSG='';drawMe();alert('密碼已改好（其他電腦要用新密碼重新登入）');}
+ catch(err){if(err.code==='LOGIN')return showGate(err.message);ME_MSG=err.message;drawMe();}
+});
+
 const drawDate=()=>{const d=new Date();$('today').textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 星期${'日一二三四五六'[d.getDay()]}`;};
 
 // ====== 網路斷線 ======
@@ -610,6 +814,7 @@ function setMode(m){
  if(!retry)setTimeout(()=>(setup?$('gName'):$('gUser').value?$('gPass'):$('gUser')).focus(),50);
 }
 function showGate(msg){
+ Object.assign(ADM,{cfg:null,draft:null,edit:-1,users:[],uEdit:null});
  AUTH.on=false;AUTH.token='';AUTH.me=null;store.set('xc_session','');
  app.hidden=true;$('gate').hidden=false;$('gPass').value='';$('gPass2').value='';
  setMode('login');gateMsg(msg||'');
@@ -617,7 +822,8 @@ function showGate(msg){
 function applyMe(j){
  AUTH.me=j;
  $('meAv').textContent=(j.name||'旭').slice(0,1);
- $('meSub').textContent=`${j.name} 登入中 · 點這裡登出`;
+ $('meSub').textContent=`${j.name} 登入中 · 改密碼、登出`;
+ $('navAdmin').hidden=j.role!=='老闆';
  drawTools();
  document.querySelectorAll('nav a[data-app]').forEach(a=>{a.hidden=!appById(a.dataset.app);});
 }
@@ -625,6 +831,7 @@ function enter(j){
  AUTH.on=true;AUTH.token=j.token;store.set('xc_session',j.token);
  applyMe(j);$('gate').hidden=true;app.hidden=false;gateMsg('');$('gPass').value='';$('gPass2').value='';
  loadDash();loadNotes();loadVN();
+ route();
 }
 async function boot(){
  setMode('login');['gUser','gUserL','gPass','gPassL'].forEach(id=>$(id).hidden=true);gateMsg('連線中…',true);
@@ -654,10 +861,7 @@ $('gateForm').addEventListener('submit',async e=>{
  catch(err){gateMsg(err.message);$('gPass').value='';$('gPass2').value='';$('gPass').focus();}
  finally{btn.disabled=false;btn.textContent=txt;}
 });
-$('meBtn').addEventListener('click',()=>{
- if(!AUTH.me||!confirm(`${AUTH.me.name} 要登出嗎？\n（每天清晨 4 點也會自動登出）`))return;
- const t=AUTH.token;showGate('已登出');aapi('logout',{token:t}).catch(()=>{});
-});
+$('meBtn').addEventListener('click',()=>{location.hash='#/me';});
 // 每 10 分鐘（和切回畫面時）確認帳號還有效；停用的人會被登出，工具捷徑也會更新
 async function recheck(){
  if(!AUTH.on||!navigator.onLine)return;
