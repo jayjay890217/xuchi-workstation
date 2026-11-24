@@ -1,1069 +1,681 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="旭馳工作台" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <title>旭馳工作台｜XCGS</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ff7a00'/%3E%3Ctext x='32' y='42' font-size='26' font-weight='900' text-anchor='middle' fill='white' font-family='Arial'%3EXC%3C/text%3E%3C/svg%3E" />
-  <style>
-    :root{
-      --bg:#080808;
-      --panel:#111214;
-      --panel2:#17191c;
-      --line:#292c31;
-      --text:#f7f7f7;
-      --muted:#9ca3af;
-      --orange:#ff7a00;
-      --orange2:#ff9b3d;
-      --ok:#67e480;
-      --danger:#ff4d4f;
-      --shadow:0 14px 36px rgba(0,0,0,.35);
-      --radius:24px;
-    }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;min-height:100%}
-    body{
-      background:
-        radial-gradient(circle at 15% 0%,rgba(255,122,0,.12),transparent 26%),
-        linear-gradient(180deg,#090909 0%,#0c0d0f 100%);
-      background-attachment:fixed;
-      background-color:var(--bg);
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
-      padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-      -webkit-font-smoothing:antialiased;
-    }
-    .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 40px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:26px}
-    .brand{display:flex;align-items:center;gap:16px}
-    .logo{
-      width:62px;height:62px;border-radius:18px;flex:none;
-      display:grid;place-items:center;font-weight:900;font-size:22px;letter-spacing:.5px;
-      background:linear-gradient(145deg,var(--orange),#ff4f00);
-      box-shadow:0 10px 26px rgba(255,122,0,.25);
-    }
-    h1{font-size:30px;line-height:1.1;margin:0 0 6px;font-weight:900}
-    .sub{color:var(--muted);font-size:14px}
-    .status{
-      background:#121315;border:1px solid var(--line);border-radius:999px;
-      padding:10px 14px;color:#cfd3d8;font-size:13px;white-space:nowrap;
-      display:flex;align-items:center;gap:8px
-    }
-    .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(103,228,128,.18)}
-    .status.off .dot{background:var(--danger);box-shadow:0 0 0 3px rgba(255,77,79,.2)}
-    .status.off{border-color:rgba(255,77,79,.5);color:#ffd2d2}
-
-    .offline-bar{
-      display:none;margin:-10px 0 18px;padding:12px 16px;border-radius:16px;
-      background:rgba(255,77,79,.1);border:1px solid rgba(255,77,79,.4);color:#ffd2d2;font-size:14px;line-height:1.6
-    }
-    .offline-bar.show{display:block}
-
-    .hero{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;margin-bottom:18px}
-    .hero-card,.clock-card{
-      border:1px solid var(--line);border-radius:var(--radius);
-      background:linear-gradient(145deg,#131416,#0f1012);box-shadow:var(--shadow);
-    }
-    .hero-card{padding:28px;position:relative;overflow:hidden}
-    .hero-card:after{
-      content:"";position:absolute;right:-60px;bottom:-70px;width:230px;height:230px;border-radius:50%;
-      background:radial-gradient(circle,rgba(255,122,0,.2),rgba(255,122,0,0) 70%);pointer-events:none
-    }
-    .eyebrow{color:var(--orange2);font-weight:800;font-size:13px;letter-spacing:1.5px;text-transform:uppercase}
-    .hero-title{font-size:34px;font-weight:900;margin:9px 0 8px}
-    .hero-copy{color:#c7cbd1;max-width:680px;line-height:1.7}
-    .clock-card{padding:24px;display:flex;flex-direction:column;justify-content:center}
-    .time{font-size:46px;font-weight:900;letter-spacing:-1.5px;font-variant-numeric:tabular-nums}
-    .date{color:var(--muted);margin-top:4px}
-
-    .section-title{display:flex;align-items:center;justify-content:space-between;margin:28px 2px 14px}
-    .section-title h2{margin:0;font-size:18px}
-    .section-title span{color:var(--muted);font-size:13px}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-    .card{
-      position:relative;min-height:150px;padding:20px;border-radius:22px;border:1px solid var(--line);
-      background:linear-gradient(145deg,var(--panel2),var(--panel));
-      text-decoration:none;color:var(--text);display:flex;flex-direction:column;
-      justify-content:space-between;box-shadow:0 8px 22px rgba(0,0,0,.22);
-      transition:transform .18s ease,border-color .18s ease;
-    }
-    .card:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
-    .card:active{transform:scale(.985)}
-    @media (hover:hover){ .card:hover{border-color:#3a3d43;transform:translateY(-2px)} }
-    .card.disabled{opacity:.45;cursor:not-allowed}
-    .card.disabled .arrow{color:var(--muted)}
-    .icon{
-      width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
-      background:#22252a;border:1px solid #30343a;font-size:23px
-    }
-    .card.orange .icon{background:rgba(255,122,0,.14);border-color:rgba(255,122,0,.35)}
-    .card h3{margin:18px 0 4px;font-size:18px}
-    .card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
-    .arrow{margin-top:14px;color:var(--orange2);font-size:13px;font-weight:800}
-    .key{
-      display:none;position:absolute;top:16px;right:16px;min-width:26px;height:26px;padding:0 7px;border-radius:8px;
-      border:1px solid #3a3d43;color:var(--muted);font-size:12px;font-weight:700;
-      place-items:center;font-variant-numeric:tabular-nums
-    }
-    @media (hover:hover) and (pointer:fine){ .key{display:grid} }
-
-    .bottom{
-      margin-top:24px;padding:18px 20px;border-radius:20px;border:1px solid var(--line);
-      background:#101113;display:flex;justify-content:space-between;align-items:center;gap:16px
-    }
-    .bottom small{color:var(--muted);line-height:1.6}
-    .btn{
-      border:1px solid #3a3d43;background:#17191c;color:#e8e8e8;border-radius:14px;
-      padding:11px 14px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit
-    }
-
-    @media (max-width: 900px){
-      .hero{grid-template-columns:1fr}
-      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-    @media (max-width: 560px){
-      .wrap{padding:18px 14px 28px}
-      header{align-items:flex-start}
-      .status span{display:none}
-      h1{font-size:24px}
-      .hero-title{font-size:28px}
-      .grid{gap:10px}
-      .card{min-height:138px;padding:16px}
-      .time{font-size:38px}
-      .bottom{flex-direction:column;align-items:flex-start}
-    }
-    @media (prefers-reduced-motion: reduce){ .card{transition:none} }
-
-    /* ====== 店內備註 ====== */
-    .hero{grid-template-columns:1.55fr .45fr}
-    .greet{color:var(--orange2);font-weight:800;font-size:14px;margin-top:10px}
-    .notes{padding:22px 24px;display:flex;flex-direction:column;gap:12px;min-height:250px}
-    .notes:after{display:none}
-    .n-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .n-head h2{margin:0;font-size:20px;font-weight:900;flex:1;white-space:nowrap}
-    .n-meta{color:var(--muted);font-size:13px}
-    .n-btn{border:1px solid #3a3d43;background:#1b1d21;color:#e8e8e8;border-radius:10px;padding:7px 11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-    .n-btn:hover{border-color:#50545b}
-    .n-btn.pri{background:var(--orange);border-color:var(--orange);color:#160a00}
-    .n-btn.ok{background:#1f6f3c;border-color:#2c8a4f;color:#eafff0}
-    .n-btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
-    .n-btn:disabled{opacity:.5;cursor:wait}
-    .n-form{display:flex;gap:10px;align-items:stretch}
-    .n-form textarea{
-      flex:1;min-height:52px;max-height:160px;resize:vertical;border-radius:14px;border:1px solid var(--line);
-      background:#0c0d0f;color:var(--text);padding:12px 14px;font:inherit;font-size:15px;line-height:1.5
-    }
-    .n-form textarea:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
-    .n-form .n-btn{padding:0 18px;font-size:15px;border-radius:14px}
-    .n-empty{color:var(--muted);font-size:14px;padding:6px 2px}
-    .n-who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .n-who .lbl{color:var(--muted);font-size:13px;font-weight:700;margin-right:2px}
-    .n-who .chip{border:1px solid #3a3d43;background:#17191c;color:#e8e8e8;border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
-    .n-who .chip.on{background:var(--orange);border-color:var(--orange);color:#160a00}
-    .n-who.need .chip{border-color:var(--orange2);animation:nudge .5s}
-    .n-who .edit{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:6px 4px}
-    @keyframes nudge{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
-    .dlg textarea{width:100%;min-height:180px;border-radius:10px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:10px 12px;font:inherit;font-size:15px;line-height:1.7;resize:vertical}
-    .n-sec{display:flex;flex-direction:column;gap:6px}
-    .n-sec h3{margin:6px 0 0;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
-    .n-pend{border:1px solid rgba(255,155,61,.45);background:rgba(255,122,0,.07);border-radius:14px;padding:10px 12px}
-    .n-pend h3{color:var(--orange2);margin-top:0}
-    .n-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-top:1px solid #1f2125}
-    .n-item:first-of-type{border-top:0}
-    .n-ic{font-size:18px;line-height:1.4}
-    .n-body{flex:1;min-width:0;font-size:14px;line-height:1.5}
-    .n-body .n-sum{font-weight:700}
-    .n-body .n-txt{color:#c7cbd1;word-break:break-word;white-space:pre-wrap}
-    .n-body .n-sum + .n-txt{color:var(--muted);font-size:13px}
-    .n-sub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:3px;font-size:12px;color:var(--muted)}
-    .n-cat{border:1px solid #3a3d43;border-radius:999px;padding:1px 9px;background:#17191c;color:#dfe2e6;font:inherit;font-size:12px;cursor:pointer}
-    .n-cat:disabled{cursor:default}
-    .pill{border-radius:999px;padding:1px 8px;font-weight:700}
-    .pill.wait{background:rgba(255,122,0,.15);color:var(--orange2)}
-    .pill.sent{background:rgba(103,228,128,.12);color:var(--ok)}
-    .pill.queue{background:#22252a;color:var(--muted)}
-    .n-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-    .n-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 18px}
-    .n-list{max-height:340px;overflow:auto;padding-right:4px}
-    .n-warn{font-size:13px;color:var(--orange2)}
-
-    /* ====== 對話框 ====== */
-    .mask{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
-    .mask[hidden]{display:none}
-    .dlg{background:#141518;border:1px solid var(--line);border-radius:20px;padding:20px;width:100%;max-width:560px;max-height:88vh;overflow:auto;box-shadow:var(--shadow)}
-    .dlg h3{margin:0 0 6px;font-size:18px}
-    .dlg p{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 12px}
-    .dlg label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
-    .dlg input,.dlg select{width:100%;border-radius:10px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:10px 12px;font:inherit;font-size:14px}
-    .dlg .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
-    .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#22252a;border:1px solid #3a3d43;color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;max-width:90vw}
-    .toast.err{background:#5c1717;border-color:#a33}
-    @media (max-width: 900px){ .hero{grid-template-columns:1fr} .clock-card{flex-direction:row;align-items:baseline;gap:14px;flex-wrap:wrap} }
-    @media (max-width: 560px){ .notes{padding:16px} .n-form{flex-direction:column} .n-form .n-btn{padding:12px} }
-    /* ====== 廠商公告 ====== */
-    .vn{margin-top:18px;padding:22px 24px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#131416,#0f1012);box-shadow:var(--shadow)}
-    .vn-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-    .vn-head h2{margin:0;font-size:20px;font-weight:900;flex:1}
-    .vn-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-    .vn-filter button{border:1px solid #3a3d43;background:#17191c;color:#e8e8e8;border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-    .vn-filter button.on{background:var(--orange);border-color:var(--orange);color:#160a00}
-    .vn-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-height:520px;overflow:auto;padding-right:4px}
-    .vn-item{border:1px solid #23262b;background:#0f1012;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
-    .vn-item.new{border-color:rgba(255,155,61,.5)}
-    .vn-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
-    .vn-vendor{font-weight:800;color:var(--orange2);font-size:13px}
-    .vn-tag{border-radius:999px;padding:1px 8px;background:#22252a;color:#dfe2e6;font-weight:700}
-    .vn-title{font-weight:800;font-size:15px;line-height:1.4}
-    .vn-sum{color:#c7cbd1;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-    .vn-link{color:var(--orange2);font-size:13px;font-weight:700;text-decoration:none}
-    .vn-pend{border:1px solid rgba(255,155,61,.45);background:rgba(255,122,0,.07);border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
-    .vn-pend > h3{margin:0;font-size:14px;color:var(--orange2)}
-    .vn-draft{border:1px solid #2a2d33;background:#0f1012;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-    .vn-draft input,.vn-draft textarea{width:100%;border-radius:10px;border:1px solid var(--line);background:#0b0c0e;color:var(--text);padding:8px 10px;font:inherit;font-size:14px;line-height:1.5}
-    .vn-draft input{font-weight:800}
-    .vn-draft textarea{min-height:70px;resize:vertical}
-    .vn-draft .n-acts{justify-content:flex-start}
-    .vn-item.skipped{opacity:.45}
-    .vn-img{width:100%;max-height:220px;object-fit:contain;background:#000;border-radius:10px}
-    @media (max-width:560px){ .vn{padding:16px} .vn-list{grid-template-columns:1fr} }
-    /* ====== 登入 ====== */
-    .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
-    .gate[hidden]{display:none}
-    .gate-box{width:100%;max-width:400px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#131416,#0f1012);box-shadow:var(--shadow);padding:30px 28px}
-    .gate-box .brand{margin-bottom:22px}
-    .gate-box h2{margin:0 0 4px;font-size:20px}
-    .gate-box p{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
-    .gate-box label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
-    .gate-box input{width:100%;border-radius:12px;border:1px solid var(--line);background:#0c0d0f;color:var(--text);padding:13px 14px;font:inherit;font-size:16px}
-    .gate-box input:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
-    .gate-box .n-btn.pri{width:100%;margin-top:20px;padding:13px;font-size:16px;border-radius:12px}
-    .gate-msg{min-height:20px;margin-top:12px;font-size:14px;color:#ffb4b4;line-height:1.5}
-    .gate-msg.info{color:var(--muted)}
-    .me{border:1px solid var(--line);background:#121315;color:#e8e8e8;border-radius:999px;padding:9px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-    .head-r{display:flex;gap:10px;align-items:center}
-    .u-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid #1f2125;font-size:14px}
-    .u-row:first-child{border-top:0}
-    .u-row b{flex:1;min-width:0}
-    .u-row small{color:var(--muted);font-weight:400}
-    .u-row.off{opacity:.5}
-    .dlg .row2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
-    .dlg .msg{min-height:18px;margin-top:10px;font-size:13px;color:#ffb4b4}
-    @media (max-width:560px){ .head-r .me{padding:8px 10px} }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旭馳工作台">
+<title>旭馳工作台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23f26a1b'/%3E%3Ctext x='32' y='43' font-size='32' font-weight='700' text-anchor='middle' fill='white' font-family='sans-serif'%3E旭%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 版型規範：design/HANDOFF.md、design/demo.html（外觀照 demo，不要自己重新設計）
+   顏色、字級、圓角只用 :root 變數；橘色只給 Logo、主要按鈕、選單橘線、縮起時的提醒點；狀態只用 ok/run/wait/bad */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f5f3,#121110);--card:light-dark(#ffffff,#1c1b19);--line:light-dark(#e8e6e2,#2c2a27);
+--ink:light-dark(#1c1917,#f2f0ed);--mute:light-dark(#6b6660,#a19b94);--soft:light-dark(#f1efec,#25231f);
+--brand:#f26a1b;--brand-ink:light-dark(#c2500f,#ff8a45);--brand-soft:light-dark(#fff1e8,#3a2214);
+--ok:light-dark(#15803d,#4ade80);--ok-bg:light-dark(#e9f7ee,#14301d);
+--run:light-dark(#1d5fd1,#7aa7ff);--run-bg:light-dark(#e8f0fd,#172640);
+--wait:light-dark(#6d3fd0,#b79bff);--wait-bg:light-dark(#f1ebfd,#2a1f45);
+--bad:light-dark(#be123c,#fb7193);--bad-bg:light-dark(#fdebef,#3d1520);
+--r:16px;--sh:0 1px 2px rgb(0 0 0/.04),0 1px 1px rgb(0 0 0/.03)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;overflow-x:clip}
+[hidden]{display:none!important}
+.num{font-family:Inter,"Noto Sans TC",sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh;transition:grid-template-columns .2s}
+.app.mini{grid-template-columns:76px minmax(0,1fr)}
+/* 側欄：固定深色，不跟著亮暗主題變 */
+.side{--s-bg:#1a1714;--s-ink:#f5f2ee;--s-mute:#a39d95;--s-line:rgb(255 255 255/.08);--s-hi:rgb(255 255 255/.07);
+ background:var(--s-bg);color:var(--s-ink);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;overflow:hidden;z-index:20}
+.shead{display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:12px;padding:2px 4px;font-weight:700;font-size:18px;white-space:nowrap}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:18px;flex:none}
+.logo small{display:block;font-weight:400;font-size:12px;color:var(--s-mute)}
+.xbtn{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--s-line);background:none;color:var(--s-mute);display:none;place-items:center;padding:0}
+.xbtn:hover{color:var(--s-ink);border-color:var(--s-mute)}
+.ws{border:1px solid var(--s-line);border-radius:14px;padding:12px 14px;background:rgb(255 255 255/.03)}
+.ws .l{font-size:12px;color:var(--s-mute)}.ws b{display:block;font-size:15px;margin:2px 0}
+.ws .s{font-size:12px;color:var(--s-mute);display:flex;align-items:center;gap:6px}
+.ws .s::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ade80}
+nav{display:flex;flex-direction:column;gap:2px}
+.ngrp{font-size:12px;color:var(--s-mute);padding:12px 12px 4px;white-space:nowrap}
+nav a{position:relative;display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;color:var(--s-mute);text-decoration:none;font-weight:500;white-space:nowrap}
+nav a svg.i{width:20px;height:20px}
+nav a:hover{background:var(--s-hi);color:var(--s-ink)}
+nav a.on{background:var(--s-hi);color:var(--s-ink)}
+nav a.on::before{content:"";position:absolute;left:-14px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--brand)}
+nav a .ct{margin-left:auto;font-size:12px;min-width:22px;height:22px;display:grid;place-items:center;background:rgb(255 255 255/.1);color:var(--s-ink);border-radius:8px;padding:0 6px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;border:1px solid var(--s-line);border-radius:14px;padding:10px 12px;white-space:nowrap}
+button.me{background:none;width:100%;text-align:left}
+button.me:hover{background:var(--s-hi)}
+.me .av{width:36px;height:36px;border-radius:50%;background:rgb(255 255 255/.1);display:grid;place-items:center;font-weight:700;flex:none}
+.me b{display:block;font-size:14px}.me span{font-size:12px;color:var(--s-mute)}
+/* 縮小成只剩圖示 */
+.mini .side{padding-inline:14px}
+.mini .logo>div:last-child,.mini .ws,.mini .ngrp,.mini nav a span.lb,.mini nav a .ct,.mini .me>div{display:none}
+.mini nav a{justify-content:center;padding:0}
+.mini nav a .dot{position:absolute;top:8px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--brand)}
+nav a .dot{display:none}.mini nav a .dot{display:block}
+.mini .me{justify-content:center;padding:8px 0;border:0}
+.hb{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;padding:0;flex:none}
+.hb:hover{background:var(--soft)}
+.shade{display:none}
+main{padding:24px clamp(16px,3vw,36px) 48px;max-width:1280px;width:100%}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.top h1{font-size:28px;line-height:1.1;margin:0;letter-spacing:-.01em}
+.top p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.top .act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;height:42px;color:var(--mute)}
+.search input{border:0;background:none;outline:0;font:inherit;font-size:16px;color:var(--ink);width:180px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{filter:brightness(.95)}
+.btn.sm{height:34px;padding:0 12px;border-radius:10px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:wait}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.kpi{padding:18px 18px 16px;display:grid;gap:6px}
+.kpi .h{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14px}
+.kpi .h .ic{width:30px;height:30px;border-radius:9px;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.kpi b{font-size:34px;line-height:1.1;font-weight:700}
+.kpi b small{font-size:15px;font-weight:500;color:var(--mute);margin-left:4px}
+.kpi .d{font-size:13px;color:var(--mute)}
+.kpi .d em{font-style:normal;color:var(--ok);font-weight:600}
+.nowrap{white-space:nowrap}
+/* 店務筆記：新增列、分類下拉、刪除鈕（第三階段，沿用 .search/.seg/.tag/.btn 的變數） */
+.nadd{display:grid;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--soft)}
+.nadd .s{font-size:13px;color:var(--mute)}
+.nadd .s.err{color:var(--bad)}
+.nwho{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nwho .seg{background:var(--card);flex-wrap:wrap}
+.nrow{display:flex;gap:8px}.nrow .search{flex:1}.nrow .search input{width:100%}
+select.tag{border:0;font:inherit;font-size:12px;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.tag{border:0;font:inherit;font-size:12px;cursor:pointer}
+.chk:disabled{cursor:default}
+.notes .ra{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.ib{border:0;background:none;color:var(--mute);padding:2px;display:grid;place-items:center;border-radius:6px}
+.ib:hover{color:var(--bad)}
+.ib svg{width:16px;height:16px}
+.nfoot{padding:0 18px 14px;display:flex;justify-content:center}
+.nwa{display:flex;gap:6px}
+.nw .s a{color:var(--mute)}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.ch{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ch h2{font-size:16px;margin:0}
+.ch .sub{color:var(--mute);font-size:13px}
+.ch .r{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:5px 12px;border-radius:8px;font-size:13px;color:var(--mute);white-space:nowrap}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--sh);font-weight:600}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:500;color:var(--mute);text-align:left;padding:10px 18px;white-space:nowrap;background:var(--soft)}
+td{padding:13px 18px;border-top:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:color-mix(in srgb,var(--soft) 55%,transparent)}
+td .t{font-weight:600}td .s{font-size:13px;color:var(--mute)}
+td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.ok{color:var(--ok);background:var(--ok-bg)}.run{color:var(--run);background:var(--run-bg)}
+.wait{color:var(--wait);background:var(--wait-bg)}.bad{color:var(--bad);background:var(--bad-bg)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;background:var(--soft);color:var(--mute);white-space:nowrap}
+.notes{list-style:none;margin:0;padding:6px 0}
+.notes li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 18px}
+.notes li+li{border-top:1px solid var(--line)}
+.chk{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);background:var(--card);display:grid;place-items:center;padding:0;margin-top:2px}
+.chk svg{width:14px;height:14px;opacity:0}
+.done .chk{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.done .chk svg{opacity:1}
+.done .nt{color:var(--mute);text-decoration:line-through}
+.nt{font-weight:500}.nm{font-size:13px;color:var(--mute);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lock{font-size:12px;color:var(--wait);display:inline-flex;gap:4px;align-items:center}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 18px 18px}
+.tool{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);background:var(--card);transition:border-color .15s,transform .15s}
+.tool:hover{border-color:var(--brand);transform:translateY(-1px)}
+.tool .ti{width:38px;height:38px;border-radius:10px;background:var(--soft);display:grid;place-items:center;flex:none}
+.tool b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tool span{font-size:12px;color:var(--mute)}
+.tool>div{overflow:hidden}
+.tool>div span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tool .ext{margin-left:auto;color:var(--mute)}
+.tool.off{opacity:.5;cursor:default}
+.tool.off:hover{border-color:var(--line);transform:none}
+.news{padding:6px 0}
+.nw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 18px}
+.nw+.nw{border-top:1px solid var(--line)}
+.nw .t{font-weight:600}.nw .s{font-size:13px;color:var(--mute)}
+.sample{font-size:12px;color:var(--mute);margin-top:18px}
+.empty{padding:28px 18px;text-align:center;color:var(--mute)}
+/* 斷線提示（沿用 .card / .pill） */
+.offline{display:flex;align-items:center;gap:12px;padding:12px 18px;margin-bottom:14px;flex-wrap:wrap}
+.offline .s{color:var(--mute);font-size:14px}
+/* 登入（沿用 .card / .btn / .search 的變數） */
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.gbox{width:min(400px,100%);padding:28px 26px 24px;display:grid;gap:6px}
+.glogo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;margin-bottom:14px;white-space:nowrap}
+.glogo small{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.gbox h2{font-size:20px;margin:0}
+.gbox .gh{margin:0 0 6px;color:var(--mute);font-size:14px}
+.gbox label{font-size:13px;color:var(--mute);margin-top:6px}
+.gbox input{height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:0 12px;font:inherit;font-size:16px;outline:0}
+.gbox input:focus{border-color:var(--ink)}
+.gbox .btn.pri{justify-content:center;margin-top:14px;height:46px}
+.gmsg{min-height:22px;font-size:14px;color:var(--bad)}
+.gmsg.info{color:var(--mute)}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr)}.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:860px){
+ .app,.app.mini{grid-template-columns:minmax(0,1fr)}
+ .side{position:fixed;left:0;top:0;bottom:0;width:min(300px,86vw);transform:translateX(-105%);transition:transform .22s ease;box-shadow:0 0 40px rgb(0 0 0/.3)}
+ .open .side{transform:none}
+ .xbtn{display:grid}
+ .shade{display:block;position:fixed;inset:0;background:rgb(0 0 0/.45);opacity:0;pointer-events:none;transition:opacity .22s;z-index:15}
+ .open .shade{opacity:1;pointer-events:auto}}
+@media(max-width:600px){.kpis{gap:10px}.kpi b{font-size:28px}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.search input{width:120px}.top .act{margin-left:0;width:100%}.search{flex:1}.search input{width:100%}
+ table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-top:1px solid var(--line)}.stack td{border:0;padding:4px 16px;display:flex;justify-content:space-between;gap:12px;text-align:right}.stack td::before{content:attr(data-l);color:var(--mute);font-size:13px;text-align:left}}
+@media(prefers-reduced-motion:reduce){.tool,.side,.shade,.app{transition:none}.tool:hover{transform:none}}
+</style>
 </head>
 <body>
-  <!-- 登入（登入前什麼功能都看不到） -->
-  <section class="gate" id="gate">
-    <form class="gate-box" id="gateForm" autocomplete="on">
-      <div class="brand">
-        <div class="logo">XC</div>
-        <div>
-          <h1>旭馳工作台</h1>
-          <div class="sub">XCGS · 店務管理入口</div>
-        </div>
-      </div>
-      <h2 id="gTitle">請登入</h2>
-      <p id="gHint">輸入你的帳號密碼才能使用工作台。</p>
-      <div id="gSetup" hidden>
-        <label for="gName">你的名字</label>
-        <input id="gName" autocomplete="name" placeholder="例：馬振傑">
-      </div>
-      <div id="gFields">
-        <label for="gUser">帳號</label>
-        <input id="gUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="英文字母或數字">
-        <label for="gPass">密碼</label>
-        <input id="gPass" type="password" autocomplete="current-password">
-      </div>
-      <div id="gSetup2" hidden>
-        <label for="gPass2">再輸入一次密碼</label>
-        <input id="gPass2" type="password" autocomplete="new-password">
-      </div>
-      <button class="n-btn pri" type="submit" id="gBtn">登入</button>
-      <div class="gate-msg info" id="gMsg">連線中…</div>
-    </form>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="wrench" viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0 4.9 4.9L21 12l-9 9-3-3 9-9-1.6-1.6a4 4 0 0 1-4.9-4.9z"/><path d="M3 21l4-4"/></symbol>
+<symbol id="file" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+<symbol id="note" viewBox="0 0 24 24"><path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4M8 9h8M8 13h5"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21h4"/></symbol>
+<symbol id="tire" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+<symbol id="ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></symbol>
+<symbol id="drop" viewBox="0 0 24 24"><path d="M12 3s7 7 7 12a7 7 0 0 1-14 0c0-5 7-12 7-12z"/></symbol>
+<!-- 以下為工具捷徑多用到的圖示（Lucide 風格，線寬同上） -->
+<symbol id="chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+<symbol id="bike" viewBox="0 0 24 24"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 9h5l4.5 7.5M12 9l-1.5-4H8M14 9l2-3h2"/></symbol>
+<symbol id="key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/></symbol>
+<symbol id="cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 8H6"/></symbol>
+<symbol id="image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+<symbol id="camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+<symbol id="table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+</svg>
+
+<!-- 登入：沒登入看不到任何功能（帳號系統 Apps Script「旭馳工作台帳號」） -->
+<section class="gate" id="gate">
+  <form class="card gbox" id="gateForm" autocomplete="on">
+    <div class="glogo"><div class="mark">旭</div><div>旭馳<small>工作台</small></div></div>
+    <h2 id="gTitle">請登入</h2>
+    <p class="gh" id="gHint">輸入你的帳號密碼才能使用工作台。</p>
+    <label for="gName" id="gNameL" hidden>你的名字</label><input id="gName" autocomplete="name" hidden>
+    <label for="gUser" id="gUserL">帳號</label>
+    <input id="gUser" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="英文字母或數字">
+    <label for="gPass" id="gPassL">密碼</label>
+    <input id="gPass" type="password" autocomplete="current-password">
+    <label for="gPass2" id="gPass2L" hidden>再輸入一次密碼</label><input id="gPass2" type="password" autocomplete="new-password" hidden>
+    <button class="btn pri" type="submit" id="gBtn">登入</button>
+    <div class="gmsg info" id="gMsg">連線中…</div>
+  </form>
+</section>
+
+<div class="app" id="app" hidden>
+<div class="shade" id="shade"></div>
+<aside class="side" id="side" aria-label="主選單">
+  <div class="shead">
+    <div class="logo"><div class="mark">旭</div><div>旭馳<small>工作台</small></div></div>
+    <button class="xbtn" id="close" aria-label="關閉選單"><svg class="i"><use href="#x"/></svg></button>
+  </div>
+  <div class="ws"><div class="l">目前資料</div><b>旭馳車業</b><div class="s" id="wsS">讀取中…</div></div>
+  <nav>
+    <div class="ngrp">每天</div>
+    <a class="on" href="#" data-go="top" title="今日總覽"><svg class="i"><use href="#home"/></svg><span class="lb">今日總覽</span></a>
+    <a href="#" data-app="cloud" title="KEY 單"><svg class="i"><use href="#wrench"/></svg><span class="lb">KEY 單</span><span class="ct num" id="navKey">—</span><i class="dot"></i></a>
+    <a href="#" data-app="cloud" title="報價：打開 KEY單 的「報價估價」"><svg class="i"><use href="#file"/></svg><span class="lb">報價</span><span class="ct num" id="navQuote">—</span><i class="dot"></i></a>
+    <a href="#" data-go="notesCard" title="店務筆記"><svg class="i"><use href="#note"/></svg><span class="lb">店務筆記</span><span class="ct num" id="navNotes">3</span><i class="dot"></i></a>
+    <a href="#" data-go="newsCard" title="廠商公告"><svg class="i"><use href="#bell"/></svg><span class="lb">廠商公告</span><span class="ct num" id="navNews">—</span><i class="dot"></i></a>
+    <div class="ngrp">管理</div>
+    <a href="#" data-app="shop" title="輪胎批發：打開店家叫貨後台"><svg class="i"><use href="#tire"/></svg><span class="lb">輪胎批發</span></a>
+    <a href="#" data-app="cloud" title="月報：打開 KEY單（老闆模式的「業績」分頁）"><svg class="i"><use href="#chart"/></svg><span class="lb">月報</span></a>
+  </nav>
+  <button class="me" id="meBtn" type="button" title="登出"><div class="av" id="meAv">旭</div><div><b>櫃台電腦</b><span id="meSub">大家共用</span></div></button>
+</aside>
+
+<main id="top">
+  <div class="top">
+    <button class="hb" id="hb" aria-label="收合選單" aria-controls="side"><svg class="i"><use href="#menu"/></svg></button>
+    <div><h1>今日總覽</h1><p id="today"></p></div>
+    <div class="act">
+      <label class="search"><svg class="i"><use href="#search"/></svg><input id="q" placeholder="搜尋車牌、客人、工單"></label>
+      <button class="btn pri" id="newKey" type="button"><svg class="i"><use href="#plus"/></svg>新增 KEY 單</button>
+    </div>
+  </div>
+
+  <div class="card offline" id="offline" hidden><span class="pill bad">離線中</span><span class="s">網路斷了，工單請改用 AppSheet 輸入，網路恢復後資料會自動同步。</span></div>
+
+  <section class="kpis">
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#wrench"/></svg></span>今日工單</div><b class="num" id="kToday">—</b><div class="d" id="kTodayD">讀取中…</div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#file"/></svg></span>待處理報價</div><b class="num" id="kQuote">—</b><div class="d" id="kQuoteD">讀取中…</div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#drop"/></svg></span>機油預付剩餘</div><b class="num" id="kOil">—</b><div class="d" id="kOilD">讀取中…</div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#bell"/></svg></span>等你確認</div><b class="num" id="kWait">7<small>件</small></b><div class="d">店務筆記 + 廠商公告</div></div>
   </section>
 
-  <main class="wrap" id="app" hidden>
-    <header>
-      <div class="brand">
-        <div class="logo">XC</div>
-        <div>
-          <h1>旭馳工作台</h1>
-          <div class="sub">XCGS · 店務管理入口</div>
-        </div>
-      </div>
-      <div class="head-r">
-        <div class="status" id="netStatus" role="status" aria-live="polite">
-          <i class="dot"></i><span id="netText">網路連線正常</span>
-        </div>
-        <button class="me" type="button" id="meBtn">👤 <span id="meName"></span></button>
-      </div>
-    </header>
-
-    <div class="offline-bar" id="offlineBar">
-      ⚠️ 目前沒有網路。工單請改用手機或平板上的 <b>AppSheet</b> 輸入，網路恢復後資料會自動同步。
+  <section class="grid">
+    <div class="card">
+      <div class="ch"><h2>今日工單</h2><span class="sub" id="cnt"></span>
+        <div class="r"><div class="seg" id="seg"><button class="on" data-f="all">全部</button><button data-f="run">未結清</button><button data-f="ok">已結清</button></div></div></div>
+      <div class="scroll"><table class="stack"><thead><tr><th>車牌 / 客人</th><th>項目</th><th>技師</th><th>狀態</th><th class="n">金額</th></tr></thead><tbody id="rows"></tbody></table></div>
     </div>
-
-    <section class="hero">
-      <div class="hero-card notes" id="notes">
-        <div class="n-head">
-          <h2>📋 店內備註</h2>
-          <span class="n-meta" id="nMeta"></span>
-          <button class="n-btn" type="button" id="nSend" title="把還沒發送的備註立刻整理後傳給櫃台">立即發送</button>
-          <button class="n-btn ghost" type="button" id="nRefresh" title="重新讀取">↻</button>
-        </div>
-        <div class="n-who" id="nWho"></div>
-        <form class="n-form" id="nForm" autocomplete="off">
-          <textarea id="nText" rows="2" placeholder="例：小陳預支 3000｜跟規速調了 2 罐 F8200｜阿明自己裝了來令片｜DRG 空濾沒了｜幫王先生叫火星塞　（Enter 送出，Shift+Enter 換行）"></textarea>
-          <button class="n-btn pri" type="submit" id="nAdd">新增</button>
-        </form>
-        <div id="nBox"><div class="n-empty">讀取中…</div></div>
-      </div>
-      <div class="clock-card">
-        <div class="time" id="clock">--:--</div>
-        <div class="date" id="date">----</div>
-        <div class="greet" id="greeting"></div>
-      </div>
-    </section>
-
-    <section class="vn" id="vendorNews">
-      <div class="vn-head">
-        <h2>📢 廠商公告</h2>
-        <span class="n-meta" id="vnMeta"></span>
-        <button class="n-btn ghost" type="button" id="vnRefresh" title="重新讀取">↻</button>
-      </div>
-      <div id="vnPend"></div>
-      <div class="vn-filter" id="vnFilter"></div>
-      <div class="vn-list" id="vnList"><div class="n-empty">讀取中…</div></div>
-    </section>
-
-    <div class="section-title">
-      <h2>常用功能</h2>
-      <span id="hint">點一下直接進入</span>
+    <div class="card" id="notesCard">
+      <div class="ch"><h2>店務筆記</h2><span class="sub" id="nSub">確認後傳給老闆娘</span><div class="r"><button class="btn sm" id="nSend" type="button" title="把等待彙整的筆記現在就傳給老闆娘">現在傳</button><button class="btn sm" id="nAddBtn" type="button" aria-expanded="false" aria-controls="nForm"><svg class="i"><use href="#plus"/></svg>記一筆</button></div></div>
+      <form class="nadd" id="nForm" hidden autocomplete="off">
+        <div class="nwho"><span class="s">誰寫的</span><div class="seg" id="nWho"></div><button type="button" class="tag" id="nStaff">改人員</button></div>
+        <div class="nrow"><label class="search"><svg class="i"><use href="#note"/></svg><input id="nText" maxlength="300" placeholder="例：小凱預支 3000、跟規速調 2 條 120/70-12"></label><button class="btn pri" id="nAdd" type="submit">送出</button></div>
+        <div class="s" id="nMsg">系統會自動分類；預支、調撥要按確認才會送出。</div>
+      </form>
+      <ul class="notes" id="notes"><li><div></div><div class="nm">讀取中…</div></li></ul>
+      <div class="nfoot" id="nFoot" hidden><button class="btn sm" id="nMore" type="button"></button></div>
     </div>
+  </section>
 
-    <nav class="grid" id="grid" aria-label="常用功能"></nav>
-
-    <div class="bottom">
-      <small id="footInfo">旭馳工作台</small>
-      <div style="display:flex;gap:8px">
-        <button class="btn" type="button" id="linkEditBtn">編輯連結</button>
-        <button class="btn" type="button" onclick="location.reload()">重新整理</button>
-      </div>
+  <section class="grid">
+    <div class="card">
+      <div class="ch"><h2>工具捷徑</h2><span class="sub">都在新視窗開啟</span></div>
+      <div class="tools" id="tools"></div>
     </div>
-  </main>
-
-  <!-- 備註人員 -->
-  <div class="mask" id="staffDlg" hidden>
-    <div class="dlg">
-      <h3>備註人員</h3>
-      <p>一行一位。所有電腦、平板共用這份名單。</p>
-      <textarea id="staffIn" spellcheck="false"></textarea>
-      <div class="acts">
-        <button class="n-btn ghost" type="button" id="staffCancel">取消</button>
-        <button class="n-btn pri" type="button" id="staffSave">儲存</button>
-      </div>
+    <div class="card" id="newsCard">
+      <div class="ch"><h2>廠商公告待審</h2><span class="sub" id="vSub">發佈後上官網</span></div>
+      <div class="news" id="news"><div class="empty">讀取中…</div></div>
     </div>
-  </div>
+  </section>
 
-  <!-- 我的帳號 -->
-  <div class="mask" id="meDlg" hidden>
-    <div class="dlg">
-      <h3 id="meTitle">我的帳號</h3>
-      <p id="meInfo"></p>
-      <label for="pwOld">目前的密碼</label>
-      <input id="pwOld" type="password" autocomplete="current-password">
-      <div class="row2">
-        <div><label for="pwNew">新密碼（至少 6 個字）</label><input id="pwNew" type="password" autocomplete="new-password"></div>
-        <div><label for="pwNew2">再輸入一次</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
-      </div>
-      <div class="msg" id="pwMsg"></div>
-      <div class="acts">
-        <button class="n-btn" type="button" id="usersBtn" hidden>👥 帳號管理</button>
-        <button class="n-btn" type="button" id="logoutBtn">登出</button>
-        <span style="flex:1"></span>
-        <button class="n-btn ghost" type="button" id="meCancel">關閉</button>
-        <button class="n-btn pri" type="button" id="pwSave">改密碼</button>
-      </div>
-    </div>
-  </div>
+  <p class="sample">今日工單、報價、機油預付是 KEY單 的真資料（約 2 分鐘更新一次）；店務筆記會傳 LINE；廠商公告按「發佈」會上官網。</p>
+</main>
+</div>
 
-  <!-- 帳號管理（只有老闆） -->
-  <div class="mask" id="usersDlg" hidden>
-    <div class="dlg">
-      <h3>帳號管理</h3>
-      <p>每位員工一個帳號。離職的人把狀態改成「停用」，他的平板最晚 10 分鐘內會被登出。</p>
-      <div id="uList"><div class="n-empty">讀取中…</div></div>
-      <h3 style="margin-top:18px" id="uFormTitle">新增帳號</h3>
-      <div class="row2">
-        <div><label for="uUser">帳號（英文或數字）</label><input id="uUser" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"></div>
-        <div><label for="uName">名字</label><input id="uName" autocomplete="off"></div>
-        <div><label for="uRole">角色</label><select id="uRole"><option>員工</option><option>老闆</option></select></div>
-        <div><label for="uStatus">狀態</label><select id="uStatus"><option>啟用</option><option>停用</option></select></div>
-      </div>
-      <label for="uPass" id="uPassLbl">密碼（至少 6 個字，告訴員工後請他自己改）</label>
-      <input id="uPass" type="text" autocomplete="off" spellcheck="false">
-      <div class="msg" id="uMsg"></div>
-      <div class="acts">
-        <button class="n-btn ghost" type="button" id="uNew">清空，改新增</button>
-        <span style="flex:1"></span>
-        <button class="n-btn ghost" type="button" id="uClose">關閉</button>
-        <button class="n-btn pri" type="button" id="uSave">新增帳號</button>
-      </div>
-    </div>
-  </div>
+<script>
+{
+// ====== 後端 ======
+// 帳號＋工具捷徑網址：Apps Script「旭馳工作台帳號」（網址不寫在公開的網頁原始碼，登入後才拿得到）
+const AUTH_API="https://script.google.com/macros/s/AKfycbyM3jFE1rr1rUhxpvkL9hT-WzLlNIVDimjp0DtWII_Ag470GG01EVOEFIkhx-5J2ou1/exec";
 
-  <!-- 編輯連結 -->
-  <div class="mask" id="linkDlg" hidden>
-    <div class="dlg">
-      <h3>編輯連結</h3>
-      <p>貼上網址就會出現在首頁，只存在這台電腦。清空 = 回到預設。</p>
-      <div id="linkRows"></div>
-      <div class="acts">
-        <button class="n-btn ghost" type="button" id="linkCancel">取消</button>
-        <button class="n-btn pri" type="button" id="linkSave">儲存</button>
-      </div>
-    </div>
-  </div>
+const $=id=>document.getElementById(id);
+const ic=(n)=>`<svg class="i"><use href="#${n}"/></svg>`;
+const esc=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const AUTH={on:false,token:'',me:null};
 
-  <script>
-    // ====== 功能按鈕清單改放在 Apps Script「旭馳工作台帳號」的 APPS，登入後才拿得到 ======
-    // （要新增／修改按鈕：改那邊的 Code.gs 並部署新版本；或在頁面最下方「編輯連結」暫時貼網址）
-    const AUTH_API = "https://script.google.com/macros/s/AKfycbyM3jFE1rr1rUhxpvkL9hT-WzLlNIVDimjp0DtWII_Ag470GG01EVOEFIkhx-5J2ou1/exec";
-    const VERSION = "2026-11-04a";
-    let APPS = [];
-    const AUTH = { on:false, token:"", me:null };
-    // ===================================
+// ====== 今日總覽真資料（KEY單 新版資料庫，經帳號系統 dash 讀取，只讀） ======
+const ST={run:['run','未結清'],ok:['ok','已結清']};
+const D={data:null,err:'',loading:false};
+const md=s=>s?`${+s.slice(5,7)}/${+s.slice(8,10)}`:'';
+const unit=(n,u)=>`${esc(n)}<small>${u}</small>`;
+const nob=x=>`<span class="nowrap">${x}</span>`;   // 數字和單位不可以換行
 
-    const $ = id => document.getElementById(id);
-    const store = {
-      get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
-      set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
-    };
-    function toast(msg, err){
-      const t = document.createElement("div");
-      t.className = "toast" + (err ? " err" : ""); t.textContent = msg;
-      document.body.appendChild(t); setTimeout(() => t.remove(), err ? 4500 : 2200);
-    }
+// ====== 今日工單 ======
+let f='all';
+const rows=$('rows'),q=$('q');
+const drawRows=()=>{
+ const t=D.data&&D.data.today;
+ if(!t){$('cnt').textContent='';rows.innerHTML=`<tr><td colspan="5" class="empty">${esc(D.err||'讀取中…')}</td></tr>`;return;}
+ const k=q.value.trim().toLowerCase();
+ const st=o=>o.pay==='已結清'?'ok':'run';
+ const list=t.list.filter(o=>(f==='all'||st(o)===f)&&(!k||[o.plate,o.who,o.items,o.tech].join(' ').toLowerCase().includes(k)));
+ $('cnt').textContent=`共 ${list.length} 張 · ${D.data.at} 更新`;
+ const none=!t.list.length?`今天還沒有工單${t.last?`（最近一張 ${md(t.last)}）`:''}`:'沒有符合的工單';
+ rows.innerHTML=list.length?list.map(o=>`<tr><td data-l="車牌"><div><div class="t num">${esc(o.plate)}</div><div class="s">${esc(o.who)}</div></div></td><td data-l="項目">${esc(o.items)}</td><td data-l="技師">${esc(o.tech)}</td><td data-l="狀態"><span class="pill ${ST[st(o)][0]}">${ST[st(o)][1]}</span></td><td data-l="金額" class="n num">${o.amt?'$'+Number(o.amt).toLocaleString():'—'}</td></tr>`).join(''):`<tr><td colspan="5" class="empty">${esc(none)}</td></tr>`;
+};
+$('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;f=b.dataset.f;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));drawRows();});
+q.addEventListener('input',drawRows);
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    let visibleApps = [];
-    const grid = $("grid");
-    const urlOf = app => (store.get("xc_links", {})[app.id] || app.url || "").trim();
+// ====== 數字卡 ======
+function drawKpis(){
+ const d=D.data;
+ if(!d){['kTodayD','kQuoteD','kOilD'].forEach(id=>$(id).textContent=D.err||'讀取中…');return;}
+ const t=d.today,wk='日一二三四五六'[new Date().getDay()],diff=t.count-t.lastWeek;
+ $('kToday').innerHTML=unit(t.count,'張');
+ $('kTodayD').innerHTML=nob(`已結清 ${esc(t.paid)} 張`)+' · '+nob(`比上週${wk} `+(diff>0?`<em>+${diff}</em>`:diff<0?`−${-diff}`:'一樣'));
+ $('kQuote').innerHTML=unit(d.quotes.count,'筆');
+ $('kQuoteD').innerHTML=d.quotes.count?nob(`未收款 ${esc(d.quotes.unpaid)} 筆`)+' · '+nob(`最久已等 ${esc(d.quotes.oldestDays)} 天`):'沒有待處理的報價估價';
+ $('kOil').innerHTML=unit(d.oil.left,'次');
+ $('kOilD').innerHTML=nob(`${esc(d.oil.people)} 位客人`)+' · '+nob(`本月已用 ${esc(d.oil.usedMonth)} 次`);
+ $('navKey').textContent=t.count;$('navQuote').textContent=d.quotes.count;
+ $('wsS').textContent=t.count?`今天 ${t.count} 張工單，${t.unpaid} 張未結清`:'今天還沒有工單';
+}
+async function loadDash(){
+ if(!AUTH.on||D.loading)return;
+ D.loading=true;
+ try{D.data=await aapi('dash',{token:AUTH.token});D.err='';}
+ catch(e){if(e.code==='LOGIN'){D.loading=false;return showGate(e.message);}D.err=D.data?'':'讀不到 KEY單 資料：'+e.message;}
+ finally{D.loading=false;}
+ drawKpis();drawRows();
+}
+setInterval(()=>{if(AUTH.on&&!document.hidden)loadDash();},3*60*1000);
 
-    // 獨立視窗：同一個功能重複點會回到同一個視窗
-    function openWin(app, url){
-      const w = Math.min(1440, screen.availWidth - 40), h = Math.min(960, screen.availHeight - 60);
-      const left = Math.max(0, (screen.availWidth - w) / 2), top = Math.max(0, (screen.availHeight - h) / 2);
-      const win = window.open(url, "xcw_" + app.id, `popup=yes,width=${w},height=${h},left=${left},top=${top}`);
-      if (win) { try { win.focus(); } catch(e){} return win; }
-      return window.open(url, "xc_" + app.id); // 視窗被擋就改開分頁
-    }
+// ====== 店務筆記（Apps Script「旭馳 LINE 通知」：存試算表 → 定時用 LINE 傳給櫃台；預支、調撥按確認才送專用群組） ======
+const NOTE_API="https://script.google.com/macros/s/AKfycbyVjERGN67aKNq1EkQ1cAPdBIothQcNjQTJBAlL6-HPWO_Cc_h3jIFy1CRQ5ZcG-spR/exec";
+const N_CATS=['預支','調撥','員工自用','缺貨','叫貨','其他'];
+const N_LABEL={'預支':'員工預支','調撥':'調撥','員工自用':'員工自用','缺貨':'缺貨','叫貨':'幫客人叫貨','其他':'其他'};
+const N_DIRS=['規速→旭馳','旭馳→規速'];
+const N={notes:[],hours:[],staff:[],who:'',today:'',err:'',loading:false,all:false};
+const nEl=$('notes');
+async function napi(type,body){
+ let r;
+ try{r=await fetch(NOTE_API+'?type='+encodeURIComponent(type),{method:'POST',body:JSON.stringify(Object.assign({},body||{},{token:AUTH.token}))});}
+ catch(e){throw new Error(navigator.onLine?'筆記系統沒有回應，請稍後再試':'離線中，請改用 AppSheet');}
+ let j;try{j=await r.json();}catch(e){throw new Error('筆記系統沒有回應，請稍後再試');}
+ if(!j.ok){if(j.error==='unauthorized'){recheck();throw new Error('登入已過期，請重新登入');}throw new Error(j.error||'發生錯誤');}
+ return j;
+}
+const hm=x=>String(x||'').slice(11,16);
+const pend=n=>n.status==='待確認';
+function nextSend(){
+ if(!N.hours.length)return '';
+ const h=new Date().getHours(),nx=N.hours.find(x=>x>h);
+ return nx===undefined?`明天 ${N.hours[0]}:00 傳`:`${nx}:00 傳`;
+}
+// 排序：待確認 → 等待彙整 → 已送出，同組新的在上面
+const nRank=n=>pend(n)?0:n.sent?2:1;
+const drawNotes=()=>{
+ $('nSub').textContent=['確認後傳給老闆娘',N.err?'':nextSend()].filter(Boolean).join(' · ');
+ if(N.err&&!N.notes.length){nEl.innerHTML=`<li><div></div><div class="nm">${esc(N.err)}</div></li>`;$('nFoot').hidden=true;sync();return;}
+ const list=[...N.notes].sort((a,b)=>(nRank(a)-nRank(b))||String(b.created).localeCompare(String(a.created)));
+ const show=N.all?list:list.slice(0,6);
+ nEl.innerHTML=show.length?show.map(n=>{
+  const p=pend(n),sent=!!n.sent,edit=!sent;
+  const day=String(n.created||'').slice(0,10)===N.today?'':md(String(n.created).slice(0,10))+' ';
+  const cat=edit?`<select class="tag" data-cat="${esc(n.id)}" aria-label="分類">${N_CATS.map(c=>`<option value="${c}"${c===n.cat?' selected':''}>${N_LABEL[c]}</option>`).join('')}</select>`:`<span class="tag">${esc(N_LABEL[n.cat]||n.cat)}</span>`;
+  const dir=n.cat==='調撥'?(edit?`<select class="tag" data-dir="${esc(n.id)}" aria-label="調撥方向"><option value="">方向？</option>${N_DIRS.map(d=>`<option${d===n.dir?' selected':''}>${d}</option>`).join('')}</select>`:(n.dir?`<span class="tag">${esc(n.dir)}</span>`:'')):'';
+  const pill=p?'<span class="pill wait">待確認</span>':sent?`<span class="pill ok">已送出 ${esc(hm(n.sent))}</span>`:'<span class="pill run">等待彙整</span>';
+  const chk=p?`<button class="chk" data-ok="${esc(n.id)}" aria-label="確認送出" title="確認後送出">${ic('check')}</button>`
+             :`<button class="chk" disabled aria-label="${sent?'已送出':'會自動傳'}" title="${sent?'已送出':'會定時自動傳給老闆娘'}">${ic('check')}</button>`;
+  return `<li class="${sent?'done':''}">${chk}
+   <div><div class="nt">${esc(n.summary||n.text)}</div><div class="nm">${cat}${dir}${p?`<span class="lock">${ic('lock')}需確認才送出</span>`:''}<span class="nowrap">${esc([n.person,day+hm(n.created)].filter(Boolean).join(' · '))}</span></div></div>
+   <div class="ra">${pill}${edit?`<button class="ib" data-del="${esc(n.id)}" aria-label="刪除" title="刪除">${ic('x')}</button>`:''}</div></li>`;
+ }).join(''):'<li><div></div><div class="nm">今天還沒有筆記。預支、調撥、員工自用、缺貨、幫客人叫貨都可以記在這裡。</div></li>';
+ $('nFoot').hidden=list.length<=6;$('nMore').textContent=N.all?'收起':`顯示全部（${list.length}）`;
+ sync();
+};
+const drawWho=()=>{
+ if(N.who&&!N.staff.includes(N.who))N.who='';
+ $('nWho').innerHTML=N.staff.map(p=>`<button type="button" class="${p===N.who?'on':''}" data-who="${esc(p)}">${esc(p)}</button>`).join('')||'<button type="button" disabled>還沒有人員</button>';
+};
+async function loadNotes(){
+ if(!AUTH.on||N.loading)return;
+ N.loading=true;
+ try{const j=await napi('note-list');Object.assign(N,{notes:j.notes||[],hours:j.hours||[],staff:j.staff||N.staff,today:j.today||'',err:''});}
+ catch(e){N.err=e.message;}
+ finally{N.loading=false;}
+ drawWho();drawNotes();
+}
+const upsert=n=>{const i=N.notes.findIndex(x=>x.id===n.id);if(i>=0)N.notes[i]=n;else N.notes.unshift(n);};
+const nMsg=(t,err)=>{$('nMsg').textContent=t;$('nMsg').className='s'+(err?' err':'');};
+$('nAddBtn').addEventListener('click',()=>{
+ const f=$('nForm'),open=f.hidden;f.hidden=!open;$('nAddBtn').setAttribute('aria-expanded',String(open));
+ if(open){drawWho();nMsg('系統會自動分類；預支、調撥要按確認才會送出。');$('nText').focus();}
+});
+$('nWho').addEventListener('click',e=>{const b=e.target.closest('[data-who]');if(!b)return;N.who=N.who===b.dataset.who?'':b.dataset.who;drawWho();$('nText').focus();});
+$('nStaff').addEventListener('click',async()=>{
+ const v=prompt('人員名單（用逗號隔開，所有電腦共用）',N.staff.join('，'));
+ if(v===null)return;
+ try{const j=await napi('note-staff',{staff:v.split(/[,，、\s]+/).filter(Boolean).join('\n')});N.staff=j.staff;drawWho();nMsg('人員名單已更新');}
+ catch(e){nMsg(e.message,1);}
+});
+$('nForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const text=$('nText').value.trim();
+ if(!text)return $('nText').focus();
+ if(!N.who)return nMsg('請先點是誰寫的',1);
+ const btn=$('nAdd');btn.disabled=true;btn.textContent='分類中…';
+ try{
+  const j=await napi('note-add',{text,person:N.who});
+  upsert(j.note);$('nText').value='';N.who='';drawWho();drawNotes();
+  nMsg(pend(j.note)?`已記下（${N_LABEL[j.note.cat]}），要按左邊的勾確認才會送出`:`已記下，分到「${N_LABEL[j.note.cat]||j.note.cat}」，${nextSend()||'會定時傳給老闆娘'}`);
+ }catch(err){nMsg(err.message,1);}
+ finally{btn.disabled=false;btn.textContent='送出';}
+});
+nEl.addEventListener('click',async e=>{
+ const ok=e.target.closest('[data-ok]'),del=e.target.closest('[data-del]');
+ if(ok){
+  const n=N.notes.find(x=>x.id===ok.dataset.ok);if(!n)return;
+  if(n.cat==='調撥'&&!n.dir&&!confirm('還沒選調撥方向，確定直接送出？'))return;
+  if(!confirm(`確認後會用 LINE 送到專用群組：\n\n${n.text}`))return;
+  ok.disabled=true;
+  try{const j=await napi('note-confirm',{id:n.id});upsert(j.note);drawNotes();}
+  catch(err){alert(err.message);ok.disabled=false;}
+ }else if(del){
+  const n=N.notes.find(x=>x.id===del.dataset.del);
+  if(!n||!confirm(`刪除這則筆記？\n\n${n.text}`))return;
+  try{await napi('note-delete',{id:n.id});N.notes=N.notes.filter(x=>x.id!==n.id);drawNotes();}
+  catch(err){alert(err.message);}
+ }
+});
+nEl.addEventListener('change',async e=>{
+ const c=e.target.closest('[data-cat]'),d=e.target.closest('[data-dir]');
+ const id=c?c.dataset.cat:d?d.dataset.dir:'';if(!id)return;
+ try{const j=await napi('note-update',c?{id,cat:c.value}:{id,dir:d.value});upsert(j.note);drawNotes();}
+ catch(err){alert(err.message);loadNotes();}
+});
+$('nMore').addEventListener('click',()=>{N.all=!N.all;drawNotes();});
+$('nSend').addEventListener('click',async()=>{
+ const waiting=N.notes.filter(n=>n.status==='一般'&&!n.sent).length;
+ if(!waiting)return alert('沒有等待彙整的筆記（預支、調撥請按左邊的勾確認）');
+ if(!confirm(`現在把 ${waiting} 則筆記整理後用 LINE 傳給老闆娘？`))return;
+ const b=$('nSend');b.disabled=true;
+ try{const j=await napi('note-send');alert(j.sent?`已傳出 ${j.sent} 則`:(j.message||'沒有需要傳的筆記'));await loadNotes();}
+ catch(err){alert(err.message);}
+ finally{b.disabled=false;}
+});
+// 其他電腦新增的筆記也同步過來（正在打字時不打斷）
+setInterval(()=>{if(AUTH.on&&!document.hidden&&document.activeElement!==$('nText'))loadNotes();},2*60*1000);
 
-    // sso：那個系統認工作台登入。先把視窗開好（iPad 要等網路回來才開會被擋），
-    // 拿到一次性通行證（60 秒、用一次）再把網址帶進去
-    async function openSso(app, url){
-      const w = app.win && !isIOS ? openWin(app, "about:blank") : window.open("about:blank", "xc_" + app.id);
-      try {
-        const { ticket } = await aapi("ticket", { token: AUTH.token, app: app.id });
-        if (!w || w.closed) return toast("視窗被擋住了，請允許這個網頁開新視窗", true);
-        w.location.href = url + (url.includes("?") ? "&" : "?") + "ticket=" + ticket;
-      } catch (e) {
-        if (w && !w.closed) w.close();
-        toast(e.message, true);
-        if (e.code === "LOGIN") showGate(e.message);
-      }
-    }
+// ====== 廠商公告（每天整理廠商 LINE → vendor-news.json → 這裡按「發佈」才上官網 service.xuchi-moto.com/news；發佈由「旭馳最新資訊」處理） ======
+const WS_API="https://script.google.com/macros/s/AKfycbwdTz4DcFqcX9n-b8AlSZghw6jCG6NgjjH7PYlfXVHTIzUQrxt6yVziCPfnm9GiYbYwJg/exec";
+const VN_URL=/(^|\.)xuchi-moto\.com$/.test(location.hostname)?'vendor-news.json':'https://desk.xuchi-moto.com/vendor-news.json';
+const VN={items:[],marks:{},updated:'',err:'',loaded:false};
+const nwEl=$('news');
+async function wsapi(api,body){
+ let r;
+ try{r=await fetch(WS_API,{method:'POST',body:JSON.stringify(Object.assign({},body||{},{api,token:AUTH.token}))});}
+ catch(e){throw new Error(navigator.onLine?'官網系統沒有回應，請稍後再試':'離線中，請稍後再試');}
+ let j;try{j=await r.json();}catch(e){throw new Error('官網系統沒有回應，請稍後再試');}
+ if(!j.ok){if(j.error==='unauthorized'){recheck();throw new Error('登入已過期，請重新登入');}throw new Error(j.error||'發生錯誤');}
+ if(j.marks)VN.marks=j.marks;
+ return j;
+}
+const vnPend=()=>VN.items.filter(i=>!VN.marks[i.id]);
+const vnBody=i=>[i.summary,i.vendor?'（消息來源：'+i.vendor+'）':''].filter(Boolean).join('\n');
+const drawNews=()=>{
+ const up=VN.updated?String(VN.updated).slice(0,10):'';
+ $('vSub').textContent='發佈後上官網'+(up?` · 整理於 ${md(up)}`:'');
+ const list=vnPend();
+ nwEl.innerHTML=(VN.err?`<div class="nw"><div class="s">${esc(VN.err)}</div></div>`:'')+(list.length?list.map(i=>`<div class="nw"><div><div class="t">${esc(i.title)}</div><div class="s">${esc(i.vendor)} · ${esc(md(i.date))}${/^https:\/\//.test(i.link||'')?` · <a href="${esc(i.link)}" target="_blank" rel="noopener">原始連結</a>`:''}</div></div><div class="nwa"><button class="btn sm" type="button" data-skip="${esc(i.id)}">略過</button><button class="btn sm pri" type="button" data-pub="${esc(i.id)}">發佈</button></div></div>`).join('')
+  :`<div class="empty">${VN.loaded?'目前沒有待審的公告'+(up?`（最近一次整理 ${md(up)}）`:''):'讀取中…'}</div>`);
+ sync();
+};
+async function loadVN(){
+ if(!AUTH.on)return;
+ try{
+  const r=await fetch(VN_URL+'?t='+Date.now(),{cache:'no-store'});
+  const j=await r.json();
+  VN.items=(j.items||[]).filter(i=>i.id).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  VN.updated=j.updated||'';
+ }catch(e){VN.err='讀不到廠商公告';}
+ try{await wsapi('ws-status');VN.err='';}catch(e){VN.err=e.message;}
+ VN.loaded=true;drawNews();
+}
+nwEl.addEventListener('click',async e=>{
+ const pub=e.target.closest('[data-pub]'),skip=e.target.closest('[data-skip]');
+ if(!pub&&!skip)return;
+ const id=(pub||skip).dataset[pub?'pub':'skip'],it=VN.items.find(x=>x.id===id);if(!it)return;
+ if(pub&&!confirm(`發佈到官網（客人看得到）？\n\n${it.title}\n\n${vnBody(it)}`))return;
+ const b=pub||skip;b.disabled=true;
+ try{
+  if(pub)await wsapi('ws-publish',{id,title:it.title,body:vnBody(it),date:it.date,image:it.image||''});
+  else await wsapi('ws-skip',{id});
+  VN.err='';drawNews();
+ }catch(err){alert(err.message);b.disabled=false;}
+});
+setInterval(()=>{if(AUTH.on&&!document.hidden)loadVN();},10*60*1000);
+function sync(){
+ const a=N.notes.filter(pend).length,b=vnPend().length;
+ $('navNotes').textContent=a;$('navNews').textContent=b;
+ $('kWait').innerHTML=`${a+b}<small>件</small>`;
+}
 
-    let keyNo = 0;
-    function renderGrid(){
-      visibleApps = APPS.filter(a => !a.iosOnly || isIOS);
-      grid.textContent = "";
-      keyNo = 0;
-      visibleApps.forEach(app => {
-        const url = urlOf(app);
-        const ready = !!url;
-        const el = document.createElement(ready ? "a" : "div");
-        el.className = "card" + (app.orange ? " orange" : "") + (ready ? "" : " disabled");
-        if (ready) {
-          el.href = url;
-          if (/^https?:/.test(url)) {
-            // 外部網頁開在固定分頁：重複點同一個功能不會一直開新分頁
-            el.target = "xc_" + app.id;
-            el.rel = "noopener";
-            if (app.sso) el.addEventListener("click", e => { e.preventDefault(); openSso(app, url); });
-            else if (app.win && !isIOS) el.addEventListener("click", e => { e.preventDefault(); openWin(app, url); });
-          }
-        } else {
-          el.setAttribute("aria-disabled", "true");
-          el.title = "按頁面最下方「編輯連結」貼上網址";
-        }
+// ====== 工具捷徑：真的連結（帳號系統裡設定的按鈕；KEY單 在左邊選單，不重複放） ======
+const TOOL_IC={line:'chat',hbs:'bike',newcar:'bike',loaner:'key',shop:'cart',site:'globe',ecpay:'card',daka:'clock',google:'globe',photos:'image',camera:'camera',cust:'user',quote:'file',sheets:'table',stock:'file'};
+const apps=()=>(AUTH.me&&AUTH.me.apps||[]).filter(a=>!a.iosOnly||isIOS);
+const appById=id=>apps().find(a=>a.id===id);
+function drawTools(){
+ const list=apps().filter(a=>a.id!=='cloud');
+ $('tools').innerHTML=list.length?list.map(a=>`<a class="tool${a.url?'':' off'}" ${a.url?`href="${esc(a.url)}" target="xc_${esc(a.id)}" rel="noopener"`:'aria-disabled="true"'} data-app="${esc(a.id)}"><span class="ti">${ic(TOOL_IC[a.id]||'ext')}</span><div><b>${esc(a.title)}</b><span>${esc(a.url?a.desc:'尚未設定網址')}</span></div><span class="ext">${ic('ext')}</span></a>`).join(''):`<div class="empty">沒有工具捷徑</div>`;
+}
+// 開新視窗；sso＝那個系統認工作台登入，先開好視窗再拿一次性通行證（60 秒、用一次）
+function openWin(a,url){
+ if(isIOS)return window.open(url,'xc_'+a.id);
+ const w=Math.min(1440,screen.availWidth-40),h=Math.min(960,screen.availHeight-60);
+ const left=Math.max(0,(screen.availWidth-w)/2),top=Math.max(0,(screen.availHeight-h)/2);
+ return window.open(url,'xcw_'+a.id,`popup=yes,width=${w},height=${h},left=${left},top=${top}`)||window.open(url,'xc_'+a.id);
+}
+async function openApp(a){
+ if(!a||!a.url)return;
+ if(!/^https?:/i.test(a.url)){location.href=a.url;return;}
+ if(!a.sso){if(a.win)openWin(a,a.url);else window.open(a.url,'xc_'+a.id);return;}
+ const w=openWin(a,'about:blank');
+ try{
+  const {ticket}=await aapi('ticket',{token:AUTH.token,app:a.id});
+  if(!w||w.closed)return alert('視窗被擋住了，請允許這個網頁開新視窗');
+  w.location.href=a.url+(a.url.includes('?')?'&':'?')+'ticket='+ticket;
+ }catch(e){if(w&&!w.closed)w.close();if(e.code==='LOGIN')showGate(e.message);else alert(e.message);}
+}
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-app]');
+ if(el){e.preventDefault();const a=appById(el.dataset.app);if(a&&a.url){openApp(a);setOpen(false);}return;}
+ const go=e.target.closest('[data-go]');
+ if(go){e.preventDefault();setOpen(false);const t=$(go.dataset.go);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});return;}
+});
+$('newKey').addEventListener('click',()=>openApp(appById('cloud')));
 
-        const top = document.createElement("div");
-        const icon = document.createElement("div");
-        icon.className = "icon";
-        icon.textContent = app.icon;
-        const h3 = document.createElement("h3");
-        h3.textContent = app.title;
-        const p = document.createElement("p");
-        p.textContent = app.desc;
-        top.append(icon, h3, p);
+// ====== 選單收合：寬螢幕縮成圖示列，窄螢幕變成滑出抽屜 ======
+const app=$('app'),mq=matchMedia('(max-width:860px)');
+try{if(localStorage.getItem('xc-mini')==='1')app.classList.add('mini');}catch(e){}
+const setOpen=v=>app.classList.toggle('open',v);
+$('hb').addEventListener('click',()=>{
+ if(mq.matches){setOpen(!app.classList.contains('open'));return;}
+ const m=app.classList.toggle('mini');try{localStorage.setItem('xc-mini',m?'1':'0');}catch(e){}
+});
+$('close').addEventListener('click',()=>setOpen(false));
+$('shade').addEventListener('click',()=>setOpen(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+mq.addEventListener('change',()=>setOpen(false));
+const drawDate=()=>{const d=new Date();$('today').textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 星期${'日一二三四五六'[d.getDay()]}`;};
 
-        const arrow = document.createElement("div");
-        arrow.className = "arrow";
-        arrow.textContent = ready ? (app.win && !isIOS ? "開新視窗 ↗" : "開啟 →") : "尚未設定";
+// ====== 網路斷線 ======
+const net=()=>{$('offline').hidden=navigator.onLine;};
+addEventListener('online',net);addEventListener('offline',net);net();
 
-        el.append(top, arrow);
+// ====== 登入 ======
+async function aapi(api,body){
+ let r;
+ try{r=await fetch(AUTH_API,{method:'POST',body:JSON.stringify(Object.assign({},body||{},{api}))});}
+ catch(e){throw new Error(navigator.onLine?'登入系統沒有回應，請稍後再試':'離線中，請改用 AppSheet');}
+ let j;try{j=await r.json();}catch(e){throw new Error('登入系統沒有回應，請稍後再試');}
+ if(!j.ok){const e=new Error(j.error||'發生錯誤');e.code=j.code;throw e;}
+ return j;
+}
+let gMode='';
+const gateMsg=(t,info)=>{$('gMsg').textContent=t||'';$('gMsg').className='gmsg'+(info?' info':'');};
+function setMode(m){
+ gMode=m;const setup=m==='setup',retry=m==='retry';
+ $('gTitle').textContent=setup?'建立老闆帳號':retry?'連不上登入系統':'請登入';
+ $('gHint').textContent=setup?'第一次使用：先建立老闆自己的帳號。':retry?'請確認網路正常，再按「重試」。網路斷了請改用 AppSheet。':'輸入你的帳號密碼才能使用工作台。';
+ ['gName','gNameL','gPass2','gPass2L'].forEach(id=>$(id).hidden=!setup);
+ ['gUser','gUserL','gPass','gPassL'].forEach(id=>$(id).hidden=retry);
+ $('gBtn').textContent=setup?'建立並登入':retry?'重試':'登入';
+ if(!retry)setTimeout(()=>(setup?$('gName'):$('gUser').value?$('gPass'):$('gUser')).focus(),50);
+}
+function showGate(msg){
+ AUTH.on=false;AUTH.token='';AUTH.me=null;store.set('xc_session','');
+ app.hidden=true;$('gate').hidden=false;$('gPass').value='';$('gPass2').value='';
+ setMode('login');gateMsg(msg||'');
+}
+function applyMe(j){
+ AUTH.me=j;
+ $('meAv').textContent=(j.name||'旭').slice(0,1);
+ $('meSub').textContent=`${j.name} 登入中 · 點這裡登出`;
+ drawTools();
+ document.querySelectorAll('nav a[data-app]').forEach(a=>{a.hidden=!appById(a.dataset.app);});
+}
+function enter(j){
+ AUTH.on=true;AUTH.token=j.token;store.set('xc_session',j.token);
+ applyMe(j);$('gate').hidden=true;app.hidden=false;gateMsg('');$('gPass').value='';$('gPass2').value='';
+ loadDash();loadNotes();loadVN();
+}
+async function boot(){
+ setMode('login');['gUser','gUserL','gPass','gPassL'].forEach(id=>$(id).hidden=true);gateMsg('連線中…',true);
+ const t=store.get('xc_session','');
+ try{
+  if(t){
+   try{const j=await aapi('me',{token:t});j.token=t;return enter(j);}
+   catch(e){if(e.code!=='LOGIN')throw e;store.set('xc_session','');}
+  }
+  const s=await aapi('status');setMode(s.hasUsers?'login':'setup');gateMsg('');
+ }catch(e){setMode('retry');gateMsg(e.message);}
+}
+$('gateForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(gMode==='retry')return boot();
+ const user=$('gUser').value.trim(),pass=$('gPass').value;
+ let api='login';const body={user,pass};
+ if(gMode==='setup'){body.name=$('gName').value.trim();api='setup';if(!body.name){gateMsg('請輸入你的名字');return $('gName').focus();}}
+ if(!user){gateMsg('請輸入帳號');return $('gUser').focus();}
+ if(!pass){gateMsg('請輸入密碼');return $('gPass').focus();}
+ if(gMode==='setup'){
+  if(pass.length<6){gateMsg('密碼至少 6 個字');return $('gPass').focus();}
+  if(pass!==$('gPass2').value){gateMsg('兩次輸入的密碼不一樣');return $('gPass2').focus();}
+ }
+ const btn=$('gBtn'),txt=btn.textContent;btn.disabled=true;btn.textContent='登入中…';gateMsg('');
+ try{enter(await aapi(api,body));}
+ catch(err){gateMsg(err.message);$('gPass').value='';$('gPass2').value='';$('gPass').focus();}
+ finally{btn.disabled=false;btn.textContent=txt;}
+});
+$('meBtn').addEventListener('click',()=>{
+ if(!AUTH.me||!confirm(`${AUTH.me.name} 要登出嗎？\n（每天清晨 4 點也會自動登出）`))return;
+ const t=AUTH.token;showGate('已登出');aapi('logout',{token:t}).catch(()=>{});
+});
+// 每 10 分鐘（和切回畫面時）確認帳號還有效；停用的人會被登出，工具捷徑也會更新
+async function recheck(){
+ if(!AUTH.on||!navigator.onLine)return;
+ try{const j=await aapi('me',{token:AUTH.token});j.token=AUTH.token;applyMe(j);}
+ catch(e){if(e.code==='LOGIN')showGate(e.message);}
+}
+setInterval(recheck,10*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){recheck();drawDate();loadDash();loadNotes();loadVN();}});
+setInterval(()=>{if(AUTH.on&&AUTH.me&&AUTH.me.exp<Date.now())showGate('已到每天的登出時間，請重新登入');},60*1000);
+// 開機常駐頁：隔天清晨沒人在用時自動重新整理，拿到最新版本
+let lastActive=Date.now();
+['pointerdown','keydown','touchstart'].forEach(t=>addEventListener(t,()=>lastActive=Date.now(),{passive:true}));
+const loadedDay=new Date().toDateString();
+setInterval(()=>{const n=new Date();if(n.toDateString()!==loadedDay&&n.getHours()>=5&&Date.now()-lastActive>600000&&navigator.onLine)location.reload();},60*1000);
 
-        if (ready && keyNo < 9) {
-          keyNo++;
-          const key = document.createElement("span");
-          key.className = "key";
-          key.textContent = keyNo;
-          el.appendChild(key);
-          el.dataset.key = String(keyNo);
-        }
-        grid.appendChild(el);
-      });
-      $("footInfo").textContent =
-        `旭馳工作台 · 版本 ${VERSION}` + (isIOS || !keyNo ? "" : ` · 數字鍵 1–${keyNo} 快速開啟`);
-    }
-
-    // ====== 編輯連結（存在這台電腦） ======
-    $("linkEditBtn").onclick = () => {
-      const saved = store.get("xc_links", {});
-      const rows = $("linkRows"); rows.textContent = "";
-      visibleApps.forEach(app => {
-        const lb = document.createElement("label");
-        lb.textContent = app.icon + " " + app.title + (app.url ? "（預設已設定）" : "");
-        lb.htmlFor = "lk_" + app.id;
-        const inp = document.createElement("input");
-        inp.id = "lk_" + app.id; inp.dataset.id = app.id; inp.type = "url";
-        inp.placeholder = app.url || "https://…"; inp.value = saved[app.id] || "";
-        rows.append(lb, inp);
-      });
-      $("linkDlg").hidden = false;
-    };
-    $("linkCancel").onclick = () => { $("linkDlg").hidden = true; };
-    $("linkSave").onclick = () => {
-      const next = {};
-      let bad = "";
-      $("linkRows").querySelectorAll("input").forEach(inp => {
-        const v = inp.value.trim();
-        if (!v) return;
-        if (!/^(https?|shortcuts):\/\//i.test(v)) bad = bad || inp.dataset.id;
-        next[inp.dataset.id] = v;
-      });
-      if (bad) return toast("網址要以 https:// 開頭", true);
-      if (!store.set("xc_links", next)) return toast("這個瀏覽器不能儲存設定", true);
-      $("linkDlg").hidden = true; renderGrid(); toast("連結已更新");
-    };
-
-    // 桌機：按數字鍵 1~9 直接開啟對應功能
-    if (matchMedia("(hover:hover) and (pointer:fine)").matches) {
-      document.getElementById("hint").textContent = "點一下或按數字鍵直接進入";
-    }
-    document.addEventListener("keydown", e => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
-      const card = grid.querySelector(`[data-key="${e.key}"]`);
-      if (card) { e.preventDefault(); card.click(); }
-    });
-
-    // ====== 時鐘與問候 ======
-    const clockEl = document.getElementById("clock");
-    const dateEl = document.getElementById("date");
-    const greetEl = document.getElementById("greeting");
-    function tick(){
-      const now = new Date();
-      clockEl.textContent = now.toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false});
-      dateEl.textContent = now.toLocaleDateString("zh-TW",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
-      const h = now.getHours();
-      greetEl.textContent = h < 11 ? "早安，今天要處理什麼？"
-                          : h < 14 ? "午安，今天要處理什麼？"
-                          : h < 18 ? "下午好，今天要處理什麼？"
-                          : "晚上好，今天要處理什麼？";
-    }
-    tick();
-    // 對齊到整秒再跑，避免分鐘跳動延遲
-    setTimeout(() => { tick(); setInterval(tick, 1000); }, 1000 - (Date.now() % 1000));
-
-    // ====== 網路狀態（真的偵測，不是寫死） ======
-    const netStatus = document.getElementById("netStatus");
-    const netText = document.getElementById("netText");
-    const offlineBar = document.getElementById("offlineBar");
-    function updateNet(){
-      const on = navigator.onLine;
-      netStatus.classList.toggle("off", !on);
-      netText.textContent = on ? "網路連線正常" : "網路已中斷";
-      offlineBar.classList.toggle("show", !on);
-    }
-    addEventListener("online", updateNet);
-    addEventListener("offline", updateNet);
-    updateNet();
-
-    // ====== 開機常駐頁：每天清晨自動重新整理一次 ======
-    // 頁面整天開著不關，清晨重整可以拿到最新版本、清掉記憶體累積
-    let lastActive = Date.now();
-    ["pointerdown","keydown","touchstart"].forEach(t => addEventListener(t, () => lastActive = Date.now(), {passive:true}));
-    const loadedDay = new Date().toDateString();
-    setInterval(() => {
-      const now = new Date();
-      const idle = Date.now() - lastActive > 10 * 60 * 1000;
-      if (now.toDateString() !== loadedDay && now.getHours() >= 5 && idle && navigator.onLine) {
-        location.reload();
-      }
-    }, 60 * 1000);
-
-    // ====== 店內備註（Apps Script「旭馳 LINE 通知」→ 試算表 → LINE） ======
-    const NOTE_API = "https://script.google.com/macros/s/AKfycbyVjERGN67aKNq1EkQ1cAPdBIothQcNjQTJBAlL6-HPWO_Cc_h3jIFy1CRQ5ZcG-spR/exec";
-    const N_CATS = ["預支","調撥","員工自用","缺貨","叫貨","其他"];
-    const N_ICON = {"預支":"💵","調撥":"🔄","員工自用":"🧑‍🔧","缺貨":"📦","叫貨":"🛒","其他":"📝"};
-    const N_CONFIRM = {"預支":true,"調撥":true};
-    const N = { notes:[], hours:[], staff:[], who:"", ready:true, loading:false, err:"" };
-
-    // 店內備註、官網發布都認工作台登入（token）；舊密碼 key 只在還沒換新版的後端用得到
-    function unauthorized(){ recheck(); return new Error("登入已過期，請重新登入"); }
-    async function napi(type, body){
-      const key = store.get("xc_note_key", "");
-      const r = await fetch(NOTE_API + "?type=" + encodeURIComponent(type), {
-        method: "POST", body: JSON.stringify(Object.assign({}, body || {}, { token: AUTH.token, key }))
-      });
-      let j;
-      try { j = await r.json(); } catch (e) { throw new Error("備註系統沒有回應，請稍後再試"); }
-      if (!j.ok) throw j.error === "unauthorized" ? unauthorized() : new Error(j.error || "發生錯誤");
-      return j;
-    }
-    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    const hm = s => String(s || "").slice(11, 16);
-    const md = s => String(s || "").slice(5, 10).replace("-", "/");
-
-    function nextSendText(){
-      if (!N.hours.length) return "";
-      const h = new Date().getHours();
-      const nx = N.hours.find(x => x > h);
-      return "下次彙整 " + (nx === undefined ? "明天 " + N.hours[0] : nx) + ":00";
-    }
-
-    function noteRow(n, today){
-      const pend = n.status === "待確認";
-      const state = pend ? '<span class="pill wait">待確認</span>'
-        : n.sent ? `<span class="pill sent">已發送 ${esc(hm(n.sent))}</span>`
-        : '<span class="pill queue">等待彙整</span>';
-      const day = n.created.slice(0, 10) === today ? "" : md(n.created) + " ";
-      const canEdit = !n.sent;
-      const catSel = canEdit
-        ? `<select class="n-cat" data-cat="${esc(n.id)}" title="改分類">${N_CATS.map(c => `<option${c === n.cat ? " selected" : ""}>${c}</option>`).join("")}</select>`
-        : `<span class="n-cat">${esc(n.cat)}</span>`;
-      const dirSel = n.cat === "調撥" && canEdit
-        ? `<select class="n-cat" data-dir="${esc(n.id)}" title="調撥方向">${["","規速→旭馳","旭馳→規速"].map(d => `<option value="${d}"${d === n.dir ? " selected" : ""}>${d || "方向？"}</option>`).join("")}</select>`
-        : (n.dir ? `<span>${esc(n.dir)}</span>` : "");
-      const acts = (pend ? `<button class="n-btn ok" data-ok="${esc(n.id)}">確認發送</button>` : "")
-        + (canEdit ? `<button class="n-btn ghost" data-del="${esc(n.id)}" title="刪除">✕</button>` : "");
-      return `<div class="n-item">
-        <div class="n-ic">${N_ICON[n.cat] || "📝"}</div>
-        <div class="n-body">
-          ${n.summary ? `<div class="n-sum">${esc(n.summary)}</div>` : ""}
-          <div class="n-txt">${esc(n.text)}</div>
-          <div class="n-sub">${catSel}${dirSel}<span>${esc([n.person, day + hm(n.created)].filter(Boolean).join(" · "))}</span>${state}</div>
-        </div>
-        ${acts ? `<div class="n-acts">${acts}</div>` : ""}
-      </div>`;
-    }
-
-    function renderWho(){
-      const w = $("nWho");
-      if (N.err || !N.staff.length) { w.textContent = ""; return; }
-      if (N.who && !N.staff.includes(N.who)) N.who = "";
-      w.innerHTML = '<span class="lbl">誰寫的</span>'
-        + N.staff.map(p => `<button type="button" class="chip${p === N.who ? " on" : ""}" data-who="${esc(p)}">${esc(p)}</button>`).join("")
-        + '<button type="button" class="edit" id="staffBtn" title="編輯人員名單">✎ 人員</button>';
-    }
-    function renderNotes(){
-      renderWho();
-      const box = $("nBox");
-      $("nMeta").textContent = N.err ? "" : [nextSendText(), N.ai ? "AI 分類" : ""].filter(Boolean).join(" · ");
-      if (N.err) {
-        box.innerHTML = `<div class="n-warn">${esc(N.err)}</div>`;
-        return;
-      }
-      const today = N.today || "";
-      const pend = N.notes.filter(n => n.status === "待確認");
-      const rest = N.notes.filter(n => n.status !== "待確認");
-      let html = "";
-      if (!N.ready) html += '<div class="n-warn">⚠️ 還沒設定 LINE 收件人（Apps Script 指令碼屬性 NOTE_TO），備註會先存著，設定後才會發送。</div>';
-      if (pend.length) {
-        html += `<div class="n-sec n-pend"><h3>⏳ 預支／調撥 待確認（${pend.length}）— 確認後才會發到專屬聊天室</h3>${pend.map(n => noteRow(n, today)).join("")}</div>`;
-      }
-      if (rest.length) {
-        const groups = N_CATS.map(c => [c, rest.filter(n => n.cat === c)]).filter(g => g[1].length);
-        html += '<div class="n-list n-groups">' + groups.map(([c, list]) =>
-          `<div class="n-sec"><h3>${N_ICON[c]} ${c}（${list.length}）</h3>${list.map(n => noteRow(n, today)).join("")}</div>`).join("") + "</div>";
-      }
-      if (!pend.length && !rest.length) html += '<div class="n-empty">今天還沒有備註。預支、調撥、員工自用、缺貨、叫貨都可以寫在這裡，系統會自動分類並定時傳給櫃台。</div>';
-      box.innerHTML = html;
-    }
-
-    async function loadNotes(quiet){
-      if (N.loading) return;
-      N.loading = true;
-      try {
-        const j = await napi("note-list");
-        Object.assign(N, { notes: j.notes || [], hours: j.hours || [], staff: j.staff || N.staff, ready: !!j.ready, ai: !!j.ai, today: j.today, err: "" });
-      } catch (e) {
-        N.err = e.message;
-        if (!quiet) toast(e.message, true);
-      } finally {
-        N.loading = false; renderNotes();
-      }
-    }
-
-    function upsert(n){
-      const i = N.notes.findIndex(x => x.id === n.id);
-      if (i >= 0) N.notes[i] = n; else N.notes.unshift(n);
-    }
-
-    $("nForm").onsubmit = async e => {
-      e.preventDefault();
-      const text = $("nText").value.trim();
-      if (!text) return $("nText").focus();
-      if (!N.who) {
-        const w = $("nWho"); w.classList.remove("need"); void w.offsetWidth; w.classList.add("need");
-        return toast("請先點選是誰寫的", true);
-      }
-      const btn = $("nAdd"); btn.disabled = true; btn.textContent = "分類中…";
-      try {
-        const j = await napi("note-add", { text, person: N.who });
-        upsert(j.note); N.err = ""; renderNotes();
-        $("nText").value = "";
-        N.who = ""; renderWho(); // 每則都要重新選人，才不會記到別人頭上
-        toast(N_CONFIRM[j.note.cat] ? `已新增（${j.note.cat}，確認後才會發送）` : `已新增到「${j.note.cat}」`);
-      } catch (err) {
-        toast(err.message, true);
-      } finally { btn.disabled = false; btn.textContent = "新增"; $("nText").focus(); }
-    };
-    $("nText").addEventListener("keydown", e => {
-      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("nForm").requestSubmit(); }
-    });
-
-    $("nBox").addEventListener("click", async e => {
-      const ok = e.target.closest("[data-ok]"), del = e.target.closest("[data-del]");
-      if (ok) {
-        const n = N.notes.find(x => x.id === ok.dataset.ok);
-        if (!n) return;
-        if (n.cat === "調撥" && !n.dir && !confirm("還沒選調撥方向，確定直接發送？")) return;
-        if (!confirm(`確認後會發送到專屬聊天室：\n\n${n.text}`)) return;
-        ok.disabled = true; ok.textContent = "發送中…";
-        try { const j = await napi("note-confirm", { id: n.id }); upsert(j.note); renderNotes(); toast("已確認並發送"); }
-        catch (err) { toast(err.message, true); ok.disabled = false; ok.textContent = "確認發送"; }
-      } else if (del) {
-        const n = N.notes.find(x => x.id === del.dataset.del);
-        if (!n || !confirm(`刪除這則備註？\n\n${n.text}`)) return;
-        try { await napi("note-delete", { id: n.id }); N.notes = N.notes.filter(x => x.id !== n.id); renderNotes(); toast("已刪除"); }
-        catch (err) { toast(err.message, true); }
-      }
-    });
-    $("nBox").addEventListener("change", async e => {
-      const c = e.target.closest("[data-cat]"), d = e.target.closest("[data-dir]");
-      const id = c ? c.dataset.cat : d ? d.dataset.dir : "";
-      if (!id) return;
-      try {
-        const j = await napi("note-update", c ? { id, cat: c.value } : { id, dir: d.value });
-        upsert(j.note); renderNotes(); toast("已更新");
-      } catch (err) { toast(err.message, true); loadNotes(true); }
-    });
-
-    $("nSend").onclick = async () => {
-      const btn = $("nSend");
-      const waiting = N.notes.filter(n => n.status === "一般" && !n.sent).length;
-      if (!waiting) return toast("沒有等待彙整的備註（預支／調撥請按「確認發送」）");
-      if (!confirm(`現在把 ${waiting} 則備註整理後傳給櫃台？`)) return;
-      btn.disabled = true;
-      try { const j = await napi("note-send"); toast(j.sent ? `已發送 ${j.sent} 則` : (j.message || "沒有需要發送的備註")); await loadNotes(true); }
-      catch (err) { toast(err.message, true); }
-      finally { btn.disabled = false; }
-    };
-    $("nRefresh").onclick = () => loadNotes(false);
-
-    $("nWho").addEventListener("click", e => {
-      const c = e.target.closest("[data-who]");
-      if (c) { N.who = N.who === c.dataset.who ? "" : c.dataset.who; $("nWho").classList.remove("need"); renderWho(); $("nText").focus(); return; }
-      if (e.target.closest("#staffBtn")) { $("staffIn").value = N.staff.join("\n"); $("staffDlg").hidden = false; $("staffIn").focus(); }
-    });
-    $("staffCancel").onclick = () => { $("staffDlg").hidden = true; };
-    $("staffSave").onclick = async () => {
-      const btn = $("staffSave"); btn.disabled = true;
-      try {
-        const j = await napi("note-staff", { staff: $("staffIn").value });
-        N.staff = j.staff; $("staffDlg").hidden = true; renderWho(); toast("人員名單已更新");
-      } catch (err) { toast(err.message, true); }
-      finally { btn.disabled = false; }
-    };
-
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape") document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
-    });
-
-    // 其他電腦或平板新增的備註也同步過來
-    setInterval(() => { if (AUTH.on && !document.hidden && !document.querySelector(".mask:not([hidden])")) loadNotes(true); }, 2 * 60 * 1000);
-    document.addEventListener("visibilitychange", () => { if (AUTH.on && !document.hidden) loadNotes(true); });
-    // ====== 廠商公告（排程每天整理廠商 LINE 官方帳號 → vendor-news.json → 這裡確認 → 發布到官網 service.xuchi-moto.com/news） ======
-    const WS_API = "https://script.google.com/macros/s/AKfycbwdTz4DcFqcX9n-b8AlSZghw6jCG6NgjjH7PYlfXVHTIzUQrxt6yVziCPfnm9GiYbYwJg/exec";
-    const VN = { items:[], marks:{}, filter:"", err:"" };
-    async function wsapi(api, body){
-      const key = store.get("xc_ws_key", "");
-      const r = await fetch(WS_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api, token: AUTH.token, key })) });
-      let j; try { j = await r.json(); } catch (e) { throw new Error("官網系統沒有回應，請稍後再試"); }
-      if (!j.ok) throw j.error === "unauthorized" ? unauthorized() : new Error(j.error || "發生錯誤");
-      if (j.marks) VN.marks = j.marks;
-      return j;
-    }
-    const vnBody = i => [i.summary, i.vendor ? "（消息來源：" + i.vendor + "）" : ""].filter(Boolean).join("\n");
-    function renderVN(){
-      const pend = VN.items.filter(i => !VN.marks[i.id]);
-      const done = VN.items.filter(i => VN.marks[i.id]);
-      let ph = "";
-      if (VN.err) ph += `<div class="n-warn">${esc(VN.err)}</div>`;
-      if (pend.length) {
-        ph += `<div class="vn-pend"><h3>⏳ 待確認（${pend.length}）— 可以先改標題內文，按「發布到官網」才會出現在 service.xuchi-moto.com/news</h3>` +
-          pend.map(i => `<div class="vn-draft" data-id="${esc(i.id)}">
-            <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T"))}</span>${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">原始連結 ↗</a>` : ""}</div>
-            ${/^https:\/\//.test(i.image || "") ? `<img class="vn-img" src="${esc(i.image)}" alt="" loading="lazy">` : '<div class="n-warn" style="font-size:12px">沒有圖片，官網會用預設底圖</div>'}
-            <input data-f="title" maxlength="60" value="${esc(i.title)}">
-            <textarea data-f="body" maxlength="2000">${esc(vnBody(i))}</textarea>
-            <div class="n-acts"><button class="n-btn pri" data-pub="${esc(i.id)}">發布到官網</button><button class="n-btn ghost" data-skip="${esc(i.id)}">略過</button></div>
-          </div>`).join("") + "</div>";
-      }
-      $("vnPend").innerHTML = ph;
-      const tags = [...new Set(done.map(i => i.tag).filter(Boolean))];
-      $("vnFilter").innerHTML = tags.length > 1
-        ? ["", ...tags].map(t => `<button type="button" data-vt="${esc(t)}" class="${t === VN.filter ? "on" : ""}">${esc(t || "全部")}</button>`).join("")
-        : "";
-      const list = done.filter(i => !VN.filter || i.tag === VN.filter);
-      $("vnList").innerHTML = list.length ? list.map(i => {
-          const m = VN.marks[i.id];
-          return `<div class="vn-item${m === "skipped" ? " skipped" : ""}">
-          <div class="vn-top"><span class="vn-vendor">${esc(i.vendor)}</span>${i.tag ? `<span class="vn-tag">${esc(i.tag)}</span>` : ""}<span>${esc(md(i.date + "T"))}</span>${m === "published" ? '<span class="pill sent">已發布官網</span>' : '<span class="pill queue">已略過</span>'}</div>
-          <div class="vn-title">${esc(i.title)}</div>
-          ${i.summary ? `<div class="vn-sum">${esc(i.summary)}</div>` : ""}
-          ${/^https:\/\//.test(i.link || "") ? `<a class="vn-link" href="${esc(i.link)}" target="_blank" rel="noopener">查看詳情 ↗</a>` : ""}
-        </div>`; }).join("") : (pend.length ? "" : '<div class="n-empty">目前沒有廠商公告。每天早上會自動整理廠商 LINE 的新消息放到這裡。</div>');
-    }
-    async function loadVN(){
-      try {
-        const r = await fetch("vendor-news.json?t=" + Date.now(), { cache:"no-store" });
-        const j = await r.json();
-        VN.items = (j.items || []).filter(i => i.id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-        $("vnMeta").textContent = j.updated ? "整理於 " + String(j.updated).slice(5, 16).replace("T", " ").replace("-", "/") : "";
-      } catch (e) { $("vnMeta").textContent = "讀取失敗"; }
-      try { await wsapi("ws-status"); VN.err = ""; } catch (e) { VN.err = e.message; }
-      renderVN();
-    }
-    $("vnPend").addEventListener("click", async e => {
-      const pub = e.target.closest("[data-pub]"), skip = e.target.closest("[data-skip]");
-      if (!pub && !skip) return;
-      const card = e.target.closest(".vn-draft"), id = card.dataset.id;
-      const it = VN.items.find(x => x.id === id); if (!it) return;
-      const btn = pub || skip; btn.disabled = true;
-      try {
-        if (pub) {
-          const title = card.querySelector('[data-f="title"]').value.trim(), body = card.querySelector('[data-f="body"]').value.trim();
-          if (!title) { btn.disabled = false; return toast("請輸入標題", true); }
-          if (!confirm(`發布到官網（客人看得到）？\n\n${title}\n\n${body}`)) { btn.disabled = false; return; }
-          btn.textContent = "發布中…";
-          await wsapi("ws-publish", { id, title, body, date: it.date, image: it.image || "" });
-          toast("已發布到官網");
-        } else {
-          await wsapi("ws-skip", { id }); toast("已略過");
-        }
-        VN.err = ""; renderVN();
-      } catch (err) { toast(err.message, true); btn.disabled = false; if (pub) btn.textContent = "發布到官網"; }
-    });
-    $("vnFilter").addEventListener("click", e => { const b = e.target.closest("[data-vt]"); if (b) { VN.filter = b.dataset.vt; renderVN(); } });
-    $("vnRefresh").onclick = loadVN;
-
-    // ====== 帳號登入（Apps Script「旭馳工作台帳號」）：沒登入什麼都看不到 ======
-    async function aapi(api, body){
-      let r;
-      try { r = await fetch(AUTH_API, { method:"POST", body: JSON.stringify(Object.assign({}, body || {}, { api })) }); }
-      catch (e) { throw new Error(navigator.onLine ? "登入系統沒有回應，請稍後再試" : "目前沒有網路，請確認網路後再試"); }
-      let j; try { j = await r.json(); } catch (e) { throw new Error("登入系統沒有回應，請稍後再試"); }
-      if (!j.ok) { const e = new Error(j.error || "發生錯誤"); e.code = j.code; throw e; }
-      return j;
-    }
-    let gMode = "";
-    function gateMsg(t, info){ $("gMsg").textContent = t || ""; $("gMsg").className = "gate-msg" + (info ? " info" : ""); }
-    function setMode(m){
-      gMode = m;
-      const setup = m === "setup", retry = m === "retry";
-      $("gTitle").textContent = setup ? "建立老闆帳號" : retry ? "連不上登入系統" : "請登入";
-      $("gHint").textContent = setup ? "第一次使用：先建立老闆自己的帳號，之後在右上角「帳號管理」幫員工開帳號。"
-        : retry ? "請確認網路正常，再按「重試」。" : "輸入你的帳號密碼才能使用工作台。";
-      $("gSetup").hidden = $("gSetup2").hidden = !setup;
-      $("gFields").hidden = retry;
-      $("gPass").autocomplete = setup ? "new-password" : "current-password";
-      $("gBtn").textContent = setup ? "建立並登入" : retry ? "重試" : "登入";
-      if (!retry) setTimeout(() => (setup ? $("gName") : $("gUser").value ? $("gPass") : $("gUser")).focus(), 50);
-    }
-    function showGate(msg){
-      AUTH.on = false; AUTH.token = ""; AUTH.me = null; APPS = [];
-      store.set("xc_session", "");
-      document.querySelectorAll(".mask").forEach(m => { m.hidden = true; });
-      $("app").hidden = true; $("gate").hidden = false;
-      $("gPass").value = ""; $("gPass2").value = ""; grid.textContent = "";
-      setMode("login"); gateMsg(msg || "");
-    }
-    function applyMe(j){
-      AUTH.me = j; APPS = j.apps || [];
-      $("meName").textContent = j.name;
-      $("usersBtn").hidden = j.role !== "老闆";
-      renderGrid();
-    }
-    function enter(j){
-      AUTH.on = true; AUTH.token = j.token;
-      store.set("xc_session", j.token);
-      applyMe(j);
-      $("gate").hidden = true; $("app").hidden = false;
-      gateMsg(""); $("gPass").value = ""; $("gPass2").value = "";
-      loadNotes(true); loadVN();
-    }
-    async function boot(){
-      setMode("login"); $("gFields").hidden = true; gateMsg("連線中…", true);
-      const t = store.get("xc_session", "");
-      try {
-        if (t) {
-          try { const j = await aapi("me", { token: t }); j.token = t; return enter(j); }
-          catch (e) { if (e.code !== "LOGIN") throw e; store.set("xc_session", ""); }
-        }
-        const s = await aapi("status");
-        setMode(s.hasUsers ? "login" : "setup"); gateMsg("");
-      } catch (e) { setMode("retry"); gateMsg(e.message); }
-    }
-    $("gateForm").onsubmit = async e => {
-      e.preventDefault();
-      if (gMode === "retry") return boot();
-      const user = $("gUser").value.trim(), pass = $("gPass").value;
-      let api = "login";
-      const body = { user, pass };
-      if (gMode === "setup") {
-        body.name = $("gName").value.trim(); api = "setup";
-        if (!body.name) { gateMsg("請輸入你的名字"); return $("gName").focus(); }
-      }
-      if (!user) { gateMsg("請輸入帳號"); return $("gUser").focus(); }
-      if (!pass) { gateMsg("請輸入密碼"); return $("gPass").focus(); }
-      if (gMode === "setup") {
-        if (pass.length < 6) { gateMsg("密碼至少 6 個字"); return $("gPass").focus(); }
-        if (pass !== $("gPass2").value) { gateMsg("兩次輸入的密碼不一樣"); return $("gPass2").focus(); }
-      }
-      const btn = $("gBtn"), txt = btn.textContent;
-      btn.disabled = true; btn.textContent = "登入中…"; gateMsg("");
-      try { enter(await aapi(api, body)); }
-      catch (err) { gateMsg(err.message); $("gPass").value = ""; $("gPass2").value = ""; $("gPass").focus(); }
-      finally { btn.disabled = false; btn.textContent = txt; }
-    };
-
-    // 每 10 分鐘（和切回這個畫面時）確認帳號還有效：員工被停用就會被登出；按鈕清單也會更新
-    async function recheck(){
-      if (!AUTH.on || !navigator.onLine) return;
-      try { applyMe(await aapi("me", { token: AUTH.token })); }
-      catch (e) { if (e.code === "LOGIN") showGate(e.message); }
-    }
-    setInterval(recheck, 10 * 60 * 1000);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) recheck(); });
-    // 到了每天清晨的登出時間，沒網路也照樣鎖起來
-    setInterval(() => { if (AUTH.on && AUTH.me && AUTH.me.exp < Date.now()) showGate("已到每天的登出時間，請重新登入"); }, 60 * 1000);
-
-    // ====== 我的帳號：改密碼、登出 ======
-    $("meBtn").onclick = () => {
-      const m = AUTH.me;
-      const until = new Date(m.exp).toLocaleString("zh-TW", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit", hour12:false });
-      $("meTitle").textContent = "👤 " + m.name;
-      $("meInfo").textContent = `帳號 ${m.user}（${m.role}）。這台會保持登入到 ${until}，每天清晨 4 點自動登出。離開店裡或借別人用之前，請按「登出」。`;
-      ["pwOld","pwNew","pwNew2"].forEach(id => $(id).value = ""); $("pwMsg").textContent = "";
-      $("meDlg").hidden = false;
-    };
-    $("meCancel").onclick = () => { $("meDlg").hidden = true; };
-    $("logoutBtn").onclick = () => {
-      const t = AUTH.token;
-      showGate("已登出");
-      aapi("logout", { token: t }).catch(() => {});
-    };
-    $("pwSave").onclick = async () => {
-      const old = $("pwOld").value, pass = $("pwNew").value, msg = $("pwMsg");
-      if (!old) { msg.textContent = "請輸入目前的密碼"; return $("pwOld").focus(); }
-      if (pass.length < 6) { msg.textContent = "新密碼至少 6 個字"; return $("pwNew").focus(); }
-      if (pass !== $("pwNew2").value) { msg.textContent = "兩次輸入的新密碼不一樣"; return $("pwNew2").focus(); }
-      const btn = $("pwSave"); btn.disabled = true; msg.textContent = "";
-      try {
-        const j = await aapi("password", { token: AUTH.token, old, pass });
-        AUTH.token = j.token; store.set("xc_session", j.token); applyMe(j);
-        $("meDlg").hidden = true; toast("密碼已改好（其他平板要用新密碼重新登入）");
-      } catch (e) { msg.textContent = e.message; if (e.code === "LOGIN") showGate(e.message); }
-      finally { btn.disabled = false; }
-    };
-
-    // ====== 帳號管理（只有老闆）======
-    let U = [], uEditing = "";
-    function uReset(){
-      uEditing = "";
-      $("uUser").disabled = false; $("uUser").value = ""; $("uName").value = ""; $("uPass").value = "";
-      $("uRole").value = "員工"; $("uStatus").value = "啟用";
-      $("uFormTitle").textContent = "新增帳號"; $("uSave").textContent = "新增帳號";
-      $("uPassLbl").textContent = "密碼（至少 6 個字，告訴員工後請他自己改）"; $("uMsg").textContent = "";
-    }
-    function renderUsers(list){
-      U = list || [];
-      $("uList").innerHTML = U.map(u => `<div class="u-row${u.status === "停用" ? " off" : ""}">
-          <b>${esc(u.name)} <small>${esc(u.user)} · ${esc(u.role)}${u.status === "停用" ? " · 已停用" : ""}${u.last ? " · 最後登入 " + esc(u.last) : ""}</small></b>
-          <button class="n-btn" type="button" data-u="${esc(u.user)}">修改</button></div>`).join("")
-        || '<div class="n-empty">還沒有帳號</div>';
-    }
-    $("usersBtn").onclick = async () => {
-      $("meDlg").hidden = true; $("usersDlg").hidden = false; uReset();
-      $("uList").innerHTML = '<div class="n-empty">讀取中…</div>';
-      try { renderUsers((await aapi("users", { token: AUTH.token })).users); }
-      catch (e) { $("uList").innerHTML = `<div class="n-warn">${esc(e.message)}</div>`; if (e.code === "LOGIN") showGate(e.message); }
-    };
-    $("uList").onclick = e => {
-      const b = e.target.closest("[data-u]"); if (!b) return;
-      const u = U.find(x => x.user === b.dataset.u); if (!u) return;
-      uEditing = u.user;
-      $("uUser").value = u.user; $("uUser").disabled = true; $("uName").value = u.name;
-      $("uRole").value = u.role; $("uStatus").value = u.status === "停用" ? "停用" : "啟用"; $("uPass").value = "";
-      $("uFormTitle").textContent = "修改「" + u.name + "」"; $("uSave").textContent = "儲存修改";
-      $("uPassLbl").textContent = "重設密碼（不改就留空）"; $("uMsg").textContent = "";
-      $("uName").focus();
-    };
-    $("uNew").onclick = uReset;
-    $("uClose").onclick = () => { $("usersDlg").hidden = true; };
-    $("uSave").onclick = async () => {
-      const body = { token: AUTH.token, user: uEditing || $("uUser").value.trim(), name: $("uName").value.trim(),
-                     role: $("uRole").value, status: $("uStatus").value, pass: $("uPass").value.trim() };
-      const msg = $("uMsg");
-      if (!uEditing) {
-        if (!body.user) { msg.textContent = "請輸入帳號"; return $("uUser").focus(); }
-        if (!body.name) { msg.textContent = "請輸入名字"; return $("uName").focus(); }
-        if (!body.pass) { msg.textContent = "新帳號要設密碼"; return $("uPass").focus(); }
-      }
-      if (body.pass && body.pass.length < 6) { msg.textContent = "密碼至少 6 個字"; return $("uPass").focus(); }
-      const btn = $("uSave"); btn.disabled = true; msg.textContent = "";
-      try {
-        const j = await aapi("user-save", body);
-        renderUsers(j.users);
-        toast(uEditing ? "已儲存「" + body.name + "」" : "已新增帳號 " + body.user.toLowerCase());
-        uReset();
-      } catch (e) { msg.textContent = e.message; if (e.code === "LOGIN") showGate(e.message); }
-      finally { btn.disabled = false; }
-    };
-
-    boot();
-    setInterval(() => { if (AUTH.on && !document.hidden &&!document.querySelector(".mask:not([hidden])") && !document.activeElement?.closest?.(".vn-draft")) loadVN(); }, 10 * 60 * 1000);
-  </script>
+drawDate();drawKpis();drawRows();
+boot();
+}
+</script>
 </body>
 </html>

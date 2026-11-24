@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>旭馳工作台示範</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE  work: a calm shop back-office, dense but quiet
+   IDEA   a well-run repair counter: brand orange only on things you press
+   PICTURE the live day itself: figures, today's work orders, notes waiting for you
+   COLOUR  white cards on warm-neutral ground; orange = brand & actions only;
+           status = green / blue / violet / crimson, never orange or amber
+   TYPE    Noto Sans TC for text, Inter for numbers
+   LAYOUT  sidebar + main; 4 figures, then orders table + notes, then tools + vendor news */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f5f3,#121110);--card:light-dark(#ffffff,#1c1b19);--line:light-dark(#e8e6e2,#2c2a27);
+--ink:light-dark(#1c1917,#f2f0ed);--mute:light-dark(#6b6660,#a19b94);--soft:light-dark(#f1efec,#25231f);
+--brand:#f26a1b;--brand-ink:light-dark(#c2500f,#ff8a45);--brand-soft:light-dark(#fff1e8,#3a2214);
+--ok:light-dark(#15803d,#4ade80);--ok-bg:light-dark(#e9f7ee,#14301d);
+--run:light-dark(#1d5fd1,#7aa7ff);--run-bg:light-dark(#e8f0fd,#172640);
+--wait:light-dark(#6d3fd0,#b79bff);--wait-bg:light-dark(#f1ebfd,#2a1f45);
+--bad:light-dark(#be123c,#fb7193);--bad-bg:light-dark(#fdebef,#3d1520);
+--r:16px;--sh:0 1px 2px rgb(0 0 0/.04),0 1px 1px rgb(0 0 0/.03)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;overflow-x:clip}
+.num{font-family:Inter,"Noto Sans TC",sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh;transition:grid-template-columns .2s}
+.app.mini{grid-template-columns:76px minmax(0,1fr)}
+/* 側欄：固定深色，不跟著亮暗主題變 */
+.side{--s-bg:#1a1714;--s-ink:#f5f2ee;--s-mute:#a39d95;--s-line:rgb(255 255 255/.08);--s-hi:rgb(255 255 255/.07);
+ background:var(--s-bg);color:var(--s-ink);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;overflow:hidden;z-index:20}
+.shead{display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:12px;padding:2px 4px;font-weight:700;font-size:18px;white-space:nowrap}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:18px;flex:none}
+.logo small{display:block;font-weight:400;font-size:12px;color:var(--s-mute)}
+.xbtn{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--s-line);background:none;color:var(--s-mute);display:none;place-items:center;padding:0}
+.xbtn:hover{color:var(--s-ink);border-color:var(--s-mute)}
+.ws{border:1px solid var(--s-line);border-radius:14px;padding:12px 14px;background:rgb(255 255 255/.03)}
+.ws .l{font-size:12px;color:var(--s-mute)}.ws b{display:block;font-size:15px;margin:2px 0}
+.ws .s{font-size:12px;color:var(--s-mute);display:flex;align-items:center;gap:6px}
+.ws .s::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ade80}
+nav{display:flex;flex-direction:column;gap:2px}
+.ngrp{font-size:12px;color:var(--s-mute);padding:12px 12px 4px;white-space:nowrap}
+nav a{position:relative;display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;color:var(--s-mute);text-decoration:none;font-weight:500;white-space:nowrap}
+nav a svg.i{width:20px;height:20px}
+nav a:hover{background:var(--s-hi);color:var(--s-ink)}
+nav a.on{background:var(--s-hi);color:var(--s-ink)}
+nav a.on::before{content:"";position:absolute;left:-14px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--brand)}
+nav a .ct{margin-left:auto;font-size:12px;min-width:22px;height:22px;display:grid;place-items:center;background:rgb(255 255 255/.1);color:var(--s-ink);border-radius:8px;padding:0 6px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;border:1px solid var(--s-line);border-radius:14px;padding:10px 12px;white-space:nowrap}
+.me .av{width:36px;height:36px;border-radius:50%;background:rgb(255 255 255/.1);display:grid;place-items:center;font-weight:700;flex:none}
+.me b{display:block;font-size:14px}.me span{font-size:12px;color:var(--s-mute)}
+/* 縮小成只剩圖示 */
+.mini .side{padding-inline:14px}
+.mini .logo>div:last-child,.mini .ws,.mini .ngrp,.mini nav a span.lb,.mini nav a .ct,.mini .me>div{display:none}
+.mini nav a{justify-content:center;padding:0}
+.mini nav a .dot{position:absolute;top:8px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--brand)}
+nav a .dot{display:none}.mini nav a .dot{display:block}
+.mini .me{justify-content:center;padding:8px 0;border:0}
+.hb{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;padding:0;flex:none}
+.hb:hover{background:var(--soft)}
+.shade{display:none}
+main{padding:24px clamp(16px,3vw,36px) 48px;max-width:1280px;width:100%}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.top h1{font-size:28px;line-height:1.1;margin:0;letter-spacing:-.01em}
+.top p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.top .act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;height:42px;color:var(--mute)}
+.search input{border:0;background:none;outline:0;font:inherit;font-size:16px;color:var(--ink);width:180px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{filter:brightness(.95)}
+.btn.sm{height:34px;padding:0 12px;border-radius:10px;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.kpi{padding:18px 18px 16px;display:grid;gap:6px}
+.kpi .h{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:14px}
+.kpi .h .ic{width:30px;height:30px;border-radius:9px;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.kpi b{font-size:34px;line-height:1.1;font-weight:700}
+.kpi b small{font-size:15px;font-weight:500;color:var(--mute);margin-left:4px}
+.kpi .d{font-size:13px;color:var(--mute)}
+.kpi .d em{font-style:normal;color:var(--ok);font-weight:600}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.ch{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ch h2{font-size:16px;margin:0}
+.ch .sub{color:var(--mute);font-size:13px}
+.ch .r{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:5px 12px;border-radius:8px;font-size:13px;color:var(--mute);white-space:nowrap}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--sh);font-weight:600}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:500;color:var(--mute);text-align:left;padding:10px 18px;white-space:nowrap;background:var(--soft)}
+td{padding:13px 18px;border-top:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:color-mix(in srgb,var(--soft) 55%,transparent)}
+td .t{font-weight:600}td .s{font-size:13px;color:var(--mute)}
+td.n{text-align:right;white-space:nowrap}th.n{text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.ok{color:var(--ok);background:var(--ok-bg)}.run{color:var(--run);background:var(--run-bg)}
+.wait{color:var(--wait);background:var(--wait-bg)}.bad{color:var(--bad);background:var(--bad-bg)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;background:var(--soft);color:var(--mute);white-space:nowrap}
+.notes{list-style:none;margin:0;padding:6px 0}
+.notes li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 18px}
+.notes li+li{border-top:1px solid var(--line)}
+.chk{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);background:var(--card);display:grid;place-items:center;padding:0;margin-top:2px}
+.chk svg{width:14px;height:14px;opacity:0}
+.done .chk{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.done .chk svg{opacity:1}
+.done .nt{color:var(--mute);text-decoration:line-through}
+.nt{font-weight:500}.nm{font-size:13px;color:var(--mute);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lock{font-size:12px;color:var(--wait);display:inline-flex;gap:4px;align-items:center}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 18px 18px}
+.tool{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);background:var(--card);transition:border-color .15s,transform .15s}
+.tool:hover{border-color:var(--brand);transform:translateY(-1px)}
+.tool .ti{width:38px;height:38px;border-radius:10px;background:var(--soft);display:grid;place-items:center}
+.tool b{display:block;font-weight:600;font-size:14px;white-space:nowrap}.tool span{font-size:12px;color:var(--mute)}
+.tool .ext{margin-left:auto;color:var(--mute)}
+.news{padding:6px 0}
+.nw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 18px}
+.nw+.nw{border-top:1px solid var(--line)}
+.nw .t{font-weight:600}.nw .s{font-size:13px;color:var(--mute)}
+.sample{font-size:12px;color:var(--mute);margin-top:18px}
+.empty{padding:28px 18px;text-align:center;color:var(--mute)}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr)}.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:860px){
+ .app,.app.mini{grid-template-columns:minmax(0,1fr)}
+ .side{position:fixed;left:0;top:0;bottom:0;width:min(300px,86vw);transform:translateX(-105%);transition:transform .22s ease;box-shadow:0 0 40px rgb(0 0 0/.3)}
+ .open .side{transform:none}
+ .xbtn{display:grid}
+ .shade{display:block;position:fixed;inset:0;background:rgb(0 0 0/.45);opacity:0;pointer-events:none;transition:opacity .22s;z-index:15}
+ .open .shade{opacity:1;pointer-events:auto}}
+@media(max-width:600px){.kpis{gap:10px}.kpi b{font-size:28px}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.search input{width:120px}.top .act{margin-left:0;width:100%}.search{flex:1}.search input{width:100%}
+ table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-top:1px solid var(--line)}.stack td{border:0;padding:4px 16px;display:flex;justify-content:space-between;gap:12px;text-align:right}.stack td::before{content:attr(data-l);color:var(--mute);font-size:13px;text-align:left}}
+@media(prefers-reduced-motion:reduce){.tool,.side,.shade,.app{transition:none}.tool:hover{transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="wrench" viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0 4.9 4.9L21 12l-9 9-3-3 9-9-1.6-1.6a4 4 0 0 1-4.9-4.9z"/><path d="M3 21l4-4"/></symbol>
+<symbol id="file" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+<symbol id="note" viewBox="0 0 24 24"><path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4M8 9h8M8 13h5"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21h4"/></symbol>
+<symbol id="tire" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+<symbol id="ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></symbol>
+<symbol id="drop" viewBox="0 0 24 24"><path d="M12 3s7 7 7 12a7 7 0 0 1-14 0c0-5 7-12 7-12z"/></symbol>
+</svg>
+
+<div class="app" id="app">
+<div class="shade" id="shade"></div>
+<aside class="side" id="side" aria-label="主選單">
+  <div class="shead">
+    <div class="logo"><div class="mark">旭</div><div>旭馳<small>工作台</small></div></div>
+    <button class="xbtn" id="close" aria-label="關閉選單"><svg class="i"><use href="#x"/></svg></button>
+  </div>
+  <div class="ws"><div class="l">目前資料</div><b>旭馳車業</b><div class="s">今天 12 張工單進行中</div></div>
+  <nav>
+    <div class="ngrp">每天</div>
+    <a class="on" href="#" title="今日總覽"><svg class="i"><use href="#home"/></svg><span class="lb">今日總覽</span></a>
+    <a href="#" title="KEY 單"><svg class="i"><use href="#wrench"/></svg><span class="lb">KEY 單</span><span class="ct num">12</span><i class="dot"></i></a>
+    <a href="#" title="報價"><svg class="i"><use href="#file"/></svg><span class="lb">報價</span><span class="ct num">5</span><i class="dot"></i></a>
+    <a href="#" title="店務筆記"><svg class="i"><use href="#note"/></svg><span class="lb">店務筆記</span><span class="ct num" id="navNotes">3</span><i class="dot"></i></a>
+    <a href="#" title="廠商公告"><svg class="i"><use href="#bell"/></svg><span class="lb">廠商公告</span><span class="ct num" id="navNews">4</span><i class="dot"></i></a>
+    <div class="ngrp">管理</div>
+    <a href="#" title="輪胎批發"><svg class="i"><use href="#tire"/></svg><span class="lb">輪胎批發</span></a>
+    <a href="#" title="月報"><svg class="i"><use href="#chart"/></svg><span class="lb">月報</span></a>
+  </nav>
+  <div class="me"><div class="av">旭</div><div><b>櫃台電腦</b><span>大家共用</span></div></div>
+</aside>
+
+<main>
+  <div class="top">
+    <button class="hb" id="hb" aria-label="收合選單" aria-controls="side"><svg class="i"><use href="#menu"/></svg></button>
+    <div><h1>今日總覽</h1><p id="today">11 月 24 日 星期二</p></div>
+    <div class="act">
+      <label class="search"><svg class="i"><use href="#search"/></svg><input id="q" placeholder="搜尋車牌、客人、工單"></label>
+      <button class="btn pri"><svg class="i"><use href="#plus"/></svg>新增 KEY 單</button>
+    </div>
+  </div>
+
+  <section class="kpis">
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#wrench"/></svg></span>今日工單</div><b class="num">12<small>張</small></b><div class="d">已完工 7 張 · 比上週二 <em>+3</em></div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#file"/></svg></span>待處理報價</div><b class="num">5<small>筆</small></b><div class="d">最久一筆已等 3 天</div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#drop"/></svg></span>機油預付剩餘</div><b class="num">186<small>次</small></b><div class="d">42 位客人 · 本月已用 31 次</div></div>
+    <div class="card kpi"><div class="h"><span class="ic"><svg class="i"><use href="#bell"/></svg></span>等你確認</div><b class="num" id="kWait">7<small>件</small></b><div class="d">店務筆記 + 廠商公告</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="ch"><h2>今日工單</h2><span class="sub" id="cnt"></span>
+        <div class="r"><div class="seg" id="seg"><button class="on" data-f="all">全部</button><button data-f="run">施工中</button><button data-f="wait">待料</button><button data-f="ok">已完工</button></div></div></div>
+      <div class="scroll"><table class="stack"><thead><tr><th>車牌 / 客人</th><th>項目</th><th>技師</th><th>狀態</th><th class="n">金額</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>店務筆記</h2><span class="sub">確認後傳給老闆娘</span><div class="r"><button class="btn sm"><svg class="i"><use href="#plus"/></svg>記一筆</button></div></div>
+      <ul class="notes" id="notes"></ul>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="ch"><h2>工具捷徑</h2><span class="sub">都在新視窗開啟</span></div>
+      <div class="tools" id="tools"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>廠商公告待審</h2><span class="sub">發佈後上官網</span></div>
+      <div class="news" id="news"></div>
+    </div>
+  </section>
+
+  <p class="sample">畫面上的工單、筆記與公告都是示範資料，正式版會接旭馳APP資料庫。</p>
+</main>
+</div>
+
+<script>
+{
+const ic=(n)=>`<svg class="i"><use href="#${n}"/></svg>`;
+const esc=(s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST={run:['run','施工中'],wait:['wait','待料'],ok:['ok','已完工'],bad:['bad','需聯絡']};
+const orders=[
+ ['MBB-2715','陳先生 · JET SL 158','定保 + 換機油（預付）','阿翔','run',780],
+ ['EPA-0932','林小姐 · 新勁戰七代','前後輪胎更換','小凱','ok',3600],
+ ['NCC-1186','王先生 · DRG 158','普利盤組 + 皮帶','阿翔','wait',4250],
+ ['BKR-5520','張先生 · MMBCU','落地改 · 後避震','小凱','run',12800],
+ ['MDE-7781','黃小姐 · Many 110','電瓶更換','阿翔','ok',1350],
+ ['KMS-3304','劉先生 · FORCE 2.0','煞車異音檢查','小凱','bad',0],
+ ['EAA-6620','蔡先生 · KRV','排氣檢驗 + 噴油嘴清洗','阿翔','ok',1600]];
+const notes=[
+ {t:'小凱預支 3,000 元',c:'員工預支',lock:1,d:0},
+ {t:'跟規速調 2 條 120/70-12',c:'調撥',lock:1,d:0},
+ {t:'林小姐要訂原廠後視鏡一對',c:'幫客人叫貨',lock:0,d:0},
+ {t:'0W-30 機油剩 4 罐',c:'缺貨',lock:0,d:1}];
+const tools=[['chart','AppSheet 業績','營收報表'],['wrench','頭家好幫手','SYM 系統'],['card','綠界','金流後台'],['clock','打卡之星','員工打卡'],['file','報價單','Apps Script'],['globe','官方網站','前台']];
+let news=[['光陽','12 月輪胎促銷：買二送安裝','今天 08:10'],['山葉','新勁戰七代 召回檢修公告','昨天 17:32'],['Motul','300V 新包裝上市通知','昨天 10:05'],['米其林','冬季輪胎保固延長','11/22']];
+let f='all';
+const rows=document.getElementById('rows'),q=document.getElementById('q');
+const drawRows=()=>{
+ const k=q.value.trim().toLowerCase();
+ const list=orders.filter(o=>(f==='all'||o[4]===f)&&(!k||o.join(' ').toLowerCase().includes(k)));
+ document.getElementById('cnt').textContent=`共 ${list.length} 張`;
+ rows.innerHTML=list.length?list.map(o=>`<tr><td data-l="車牌"><div><div class="t num">${esc(o[0])}</div><div class="s">${esc(o[1])}</div></div></td><td data-l="項目">${esc(o[2])}</td><td data-l="技師">${esc(o[3])}</td><td data-l="狀態"><span class="pill ${ST[o[4]][0]}">${ST[o[4]][1]}</span></td><td data-l="金額" class="n num">${o[5]?'$'+o[5].toLocaleString():'—'}</td></tr>`).join(''):`<tr><td colspan="5" class="empty">沒有符合的工單</td></tr>`;
+};
+document.getElementById('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;f=b.dataset.f;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));drawRows();});
+q.addEventListener('input',drawRows);
+const nEl=document.getElementById('notes');
+const drawNotes=()=>{
+ nEl.innerHTML=notes.map((n,i)=>`<li class="${n.d?'done':''}"><button class="chk" data-i="${i}" aria-label="確認">${ic('check')}</button><div><div class="nt">${esc(n.t)}</div><div class="nm"><span class="tag">${esc(n.c)}</span>${n.lock&&!n.d?`<span class="lock">${ic('lock')}需確認才送出</span>`:''}</div></div><span class="pill ${n.d?'ok':'wait'}">${n.d?'已送出':'待確認'}</span></li>`).join('');
+ sync();
+};
+nEl.addEventListener('click',e=>{const b=e.target.closest('.chk');if(!b)return;const n=notes[+b.dataset.i];n.d=n.d?0:1;drawNotes();});
+document.getElementById('tools').innerHTML=tools.map(t=>`<a class="tool" href="#" target="_blank" rel="noopener"><span class="ti">${ic(t[0])}</span><div><b>${esc(t[1])}</b><span>${esc(t[2])}</span></div><span class="ext">${ic('ext')}</span></a>`).join('');
+const nwEl=document.getElementById('news');
+const drawNews=()=>{
+ nwEl.innerHTML=news.length?news.map((n,i)=>`<div class="nw"><div><div class="t">${esc(n[1])}</div><div class="s">${esc(n[0])} · ${esc(n[2])}</div></div><button class="btn sm pri" data-i="${i}">發佈</button></div>`).join(''):`<div class="empty">今天的公告都處理完了</div>`;
+ sync();
+};
+nwEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;news.splice(+b.dataset.i,1);drawNews();});
+function sync(){
+ const a=notes.filter(n=>!n.d).length,b=news.length;
+ document.getElementById('navNotes').textContent=a;document.getElementById('navNews').textContent=b;
+ document.getElementById('kWait').innerHTML=`${a+b}<small>件</small>`;
+}
+/* 選單收合：寬螢幕縮成圖示列，窄螢幕變成滑出抽屜 */
+const app=document.getElementById('app'),mq=matchMedia('(max-width:860px)');
+try{if(localStorage.getItem('xc-mini')==='1')app.classList.add('mini');}catch(e){}
+const setOpen=v=>app.classList.toggle('open',v);
+document.getElementById('hb').addEventListener('click',()=>{
+ if(mq.matches){setOpen(!app.classList.contains('open'));return;}
+ const m=app.classList.toggle('mini');try{localStorage.setItem('xc-mini',m?'1':'0');}catch(e){}
+});
+document.getElementById('close').addEventListener('click',()=>setOpen(false));
+document.getElementById('shade').addEventListener('click',()=>setOpen(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+mq.addEventListener('change',()=>setOpen(false));
+const d=new Date();document.getElementById('today').textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 星期${'日一二三四五六'[d.getDay()]}`;
+drawRows();drawNotes();drawNews();
+}
+</script>
+</body>
+</html>
